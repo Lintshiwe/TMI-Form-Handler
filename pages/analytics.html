@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="../assets/favicon.png">
     <title>Analytics - Registration Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="../assets/styles.css">
     <style>
         body { padding: 0; }
@@ -80,7 +79,7 @@
             </a>
         </nav>
 
-        <div class="content-area">
+        <div class="content-area" id="page-content">
             <div class="metrics-grid skeleton" id="sk-metrics">
                 <div class="metric-card active"><div class="sk sk-card"></div></div>
                 <div class="metric-card"><div class="sk sk-card"></div></div>
@@ -133,12 +132,8 @@
                 <div class="chart-title">Registrations by Province</div>
                 <canvas id="barChart"></canvas>
             </div>
-        </div>
-    </div>
-</div>
 
-<script src="../assets/app.js?v=3"></script>
-<script>
+            <script>
     var lineChart, donutChart, barChart;
 
     function getFilteredData(range) {
@@ -262,5 +257,8 @@
         TMI.fetchRegistrations().then(initAnalytics);
     }
 </script>
+        </div>
+    </div>
+</div>
 </body>
 </html>

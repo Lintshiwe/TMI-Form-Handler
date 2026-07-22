@@ -224,7 +224,7 @@
             </a>
         </nav>
 
-        <div class="content-area">
+        <div class="content-area" id="page-content">
             <div class="filter-bar">
                 <div class="filter-dropdown">
                     <select id="filterStatus" onchange="applyFilters()">
@@ -293,12 +293,8 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
 
-<script src="../assets/app.js?v=3"></script>
-<script>
+            <script>
     let currentPage = 1;
     const perPage = 10;
     let filteredData = [];
@@ -425,5 +421,8 @@
         TMI.fetchRegistrations().then(initPage);
     }
 </script>
+        </div>
+    </div>
+</div>
 </body>
 </html>
