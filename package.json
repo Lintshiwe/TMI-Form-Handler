@@ -1,0 +1,7 @@
+{
+  "name": "tmi-form-handler",
+  "private": true,
+  "dependencies": {
+    "@netlify/blobs": "^8.2.0"
+  }
+}
