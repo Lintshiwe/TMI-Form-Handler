@@ -83,21 +83,11 @@ export async function handler(event) {
         auth: { user: smtpUser, pass: smtpPass },
       })
 
-      const bgCid = "ticket-bg"
       const bgExists = fs.existsSync(bgPath)
-      const attachments = []
-
-      if (bgExists) {
-        attachments.push({
-          filename: `ticket-background.png`,
-          content: fs.readFileSync(bgPath),
-          contentType: "image/png",
-          cid: bgCid
-        })
-      }
+      const bgUrl = `https://tmi-form-handler.netlify.app/assets/tmi-ticket-background${num}.png`
 
       const bgStyle = bgExists
-        ? `background-image:url(cid:${bgCid});background-size:cover;background-position:center;background-repeat:no-repeat;background-color:#eef4ff`
+        ? `background-image:url(${bgUrl});background-size:cover;background-position:center;background-repeat:no-repeat;background-color:#eef4ff`
         : "background-color:#eef4ff"
 
       await transporter.sendMail({
@@ -112,6 +102,11 @@ export async function handler(event) {
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="${bgStyle}">
     <tr>
       <td align="center" style="padding:40px 16px">
+        <!--[if gte mso 9]>
+        <v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="width:600px;height:800px">
+          <v:fill type="frame" src="${bgUrl}" />
+          <v:textbox inset="0,0,0,0" style="mso-fit-shape-to-text:true">
+        <![endif]-->
         <table role="presentation" style="width:100%;max-width:420px;margin:0 auto;background:#ffffff;border-radius:24px;border:1px solid #e2e8f0">
           <tr>
             <td align="center" style="padding:32px 24px 0">
@@ -158,12 +153,16 @@ export async function handler(event) {
             </td>
           </tr>
         </table>
+        <!--[if gte mso 9]>
+          </v:textbox>
+        </v:rect>
+        <![endif]-->
       </td>
     </tr>
   </table>
 </body>
 </html>`,
-        attachments
+        attachments: []
       })
 
       await client.mutation("registrations:updateStatus", {
