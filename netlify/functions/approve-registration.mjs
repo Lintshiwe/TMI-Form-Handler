@@ -72,6 +72,7 @@ export async function handler(event) {
 
     if (smtpHost && smtpUser) {
       const { num, bgPath } = pickBackground()
+      const bgExists = fs.existsSync(bgPath)
       const name = escapeHtml(reg.firstName + " " + reg.lastName)
       const team = escapeHtml(reg.teamName || "Unassigned")
       const track = escapeHtml(reg.hackathonTrack || "General")
@@ -83,15 +84,14 @@ export async function handler(event) {
         auth: { user: smtpUser, pass: smtpPass },
       })
 
-      const bgExists = fs.existsSync(bgPath)
       const bgUrl = `https://tmi-form-handler.netlify.app/assets/tmi-ticket-background${num}.png`
 
-      const bgStyle = bgExists
-        ? `background-image:url(${bgUrl});background-size:cover;background-position:center;background-repeat:no-repeat;background-color:#eef4ff`
+      const bgStyles = bgExists
+        ? `background-image:url('${bgUrl}');background-size:cover;background-position:center;background-repeat:no-repeat;background-color:#eef4ff`
         : "background-color:#eef4ff"
 
       await transporter.sendMail({
-        from: smtpUser,
+        from: '"TMI Hackathon" <' + smtpUser + '>',
         to: reg.email,
         subject: "Your TMI Hackathon 2024 Entry Ticket",
         html: `
@@ -99,15 +99,15 @@ export async function handler(event) {
 <html>
 <head><meta charset="UTF-8"></head>
 <body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="${bgStyle}">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#eef4ff" style="${bgStyles}">
     <tr>
       <td align="center" style="padding:40px 16px">
         <!--[if gte mso 9]>
-        <v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="width:600px;height:800px">
+        <v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="width:600px;min-height:800px">
           <v:fill type="frame" src="${bgUrl}" />
-          <v:textbox inset="0,0,0,0" style="mso-fit-shape-to-text:true">
+          <v:textbox inset="0,0,0,0">
         <![endif]-->
-        <table role="presentation" style="width:100%;max-width:420px;margin:0 auto;background:#ffffff;border-radius:24px;border:1px solid #e2e8f0">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" align="center" style="max-width:420px;margin:0 auto;background:#ffffff;border-radius:24px;border:1px solid #e2e8f0">
           <tr>
             <td align="center" style="padding:32px 24px 0">
               <table role="presentation" style="width:64px;height:64px;border:1px solid #e2e8f0;border-radius:16px;margin:0 auto 12px">
