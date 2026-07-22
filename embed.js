@@ -73,9 +73,14 @@
     x.send();
   }
 
+  function disableRightClick(e) {
+    e.preventDefault();
+  }
+
   function onReady() {
     addAiTrap();
     checkStatus();
+    document.addEventListener('contextmenu', disableRightClick);
   }
 
   if (document.readyState === 'loading') {
