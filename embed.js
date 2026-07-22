@@ -65,9 +65,9 @@
         var r = JSON.parse(x.responseText);
         if (r.open === false) showClosed();
         else reveal();
-      } catch (e) { reveal(); }
+      } catch (e) { showClosed(); }
     };
-    x.onerror = function () { reveal(); };
+    x.onerror = function () { showClosed(); };
     x.send();
   }
 
