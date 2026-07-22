@@ -301,6 +301,14 @@ TMI.hideSkeletons = function(parentSelector) {
     });
     TMI.applyAccessibilitySettings();
     TMI.fetchRegistrations();
+    function renderOnce() {
+        TMI.renderProfileAvatar(document.getElementById('headerAvatar'));
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', renderOnce);
+    } else {
+        renderOnce();
+    }
 })();
 
 TMI.setActiveNav = function(path) {
