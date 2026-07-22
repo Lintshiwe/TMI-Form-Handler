@@ -342,9 +342,6 @@ TMI.healthCheck = function() {
 
 (function() {
     TMI.injectSkeletonStyles();
-    document.querySelectorAll('head > style:not([id])').forEach(function(s) {
-        s.setAttribute('data-page-css', '');
-    });
     TMI.fetchRegStatusAPI().then(function() {
         TMI.updateRegBadge();
     });
@@ -383,13 +380,15 @@ TMI.loadPage = function(path) {
             var currentContent = document.getElementById('page-content');
             if (!newContent || !currentContent) return;
             if (newTitle) document.title = newTitle.textContent;
-            document.querySelectorAll('style[data-page-css]').forEach(function(s) { s.remove(); });
-            doc.querySelectorAll('head style').forEach(function(s) {
-                var ns = document.createElement('style');
-                ns.setAttribute('data-page-css', '');
-                ns.textContent = s.textContent;
-                document.head.appendChild(ns);
-            });
+            document.querySelectorAll('style:not(#tmi-skeleton-styles)').forEach(function(s) { s.remove(); });
+            var head = doc.head || doc.querySelector('head');
+            if (head) {
+                head.querySelectorAll('style').forEach(function(s) {
+                    var ns = document.createElement('style');
+                    ns.textContent = s.textContent;
+                    document.head.appendChild(ns);
+                });
+            }
             currentContent.innerHTML = newContent.innerHTML;
             currentContent.querySelectorAll('script').forEach(function(oldScript) {
                 var newScript = document.createElement('script');
