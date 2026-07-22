@@ -128,8 +128,10 @@ TMI.setUserRole = function(role) {
 
 TMI.getUserProfile = function() {
     return {
-        name: localStorage.getItem('tmi_user_name') || 'Admin User',
-        email: localStorage.getItem('tmi_user_email') || 'admin@example.com',
+        name: localStorage.getItem('tmi_user_name') || 'Lintshiwe',
+        email: localStorage.getItem('tmi_user_email') || 'Ntoampilp@gmail.com',
+        phone: localStorage.getItem('tmi_user_phone') || '+27 84 985 1395',
+        bio: localStorage.getItem('tmi_user_bio') || 'Innovative \u2022 Resilient \u2022 Tech-driven',
         role: TMI.getUserRole(),
         avatar: localStorage.getItem('tmi_user_avatar') || '',
     };
@@ -138,6 +140,8 @@ TMI.getUserProfile = function() {
 TMI.saveUserProfile = function(profile) {
     if (profile.name) localStorage.setItem('tmi_user_name', profile.name);
     if (profile.email) localStorage.setItem('tmi_user_email', profile.email);
+    if (profile.phone !== undefined) localStorage.setItem('tmi_user_phone', profile.phone);
+    if (profile.bio !== undefined) localStorage.setItem('tmi_user_bio', profile.bio);
     if (profile.role) localStorage.setItem('tmi_user_role', profile.role);
     if (profile.avatar !== undefined) localStorage.setItem('tmi_user_avatar', profile.avatar);
 };
