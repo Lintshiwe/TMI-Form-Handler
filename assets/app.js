@@ -300,8 +300,7 @@ TMI.injectSkeletonStyles = function() {
         '.sk-card{height:100px;border-radius:14px}' +
         '.sk-chart{height:300px;border-radius:14px;margin-bottom:20px}' +
         '.sk-badge{height:32px;width:160px;border-radius:9999px;flex:none}' +
-        '.skeleton{opacity:1;transition:opacity .3s}' +
-        '.skeleton-hidden{display:none}';
+        '.skeleton{opacity:1;transition:opacity .3s}';
     document.head.appendChild(style);
 };
 
@@ -310,7 +309,7 @@ TMI.showSkeletons = function(parentSelector) {
     var parent = parentSelector ? document.querySelector(parentSelector) : document;
     if (!parent) return;
     parent.querySelectorAll('.skeleton').forEach(function(el) {
-        el.classList.remove('skeleton-hidden');
+        el.style.display = '';
     });
 };
 
@@ -318,7 +317,7 @@ TMI.hideSkeletons = function(parentSelector) {
     var parent = parentSelector ? document.querySelector(parentSelector) : document;
     if (!parent) return;
     parent.querySelectorAll('.skeleton').forEach(function(el) {
-        el.classList.add('skeleton-hidden');
+        el.style.display = 'none';
     });
 };
 
