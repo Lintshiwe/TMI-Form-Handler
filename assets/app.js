@@ -260,6 +260,32 @@ TMI.getStatusBadge = function(r) {
     return '<span class="status-badge ' + cls + '">' + status + '</span>';
 };
 
+TMI.showToast = function(message, type) {
+    type = type || 'info';
+    var existing = document.getElementById('tmi-toast-container');
+    if (!existing) {
+        var container = document.createElement('div');
+        container.id = 'tmi-toast-container';
+        container.style.cssText = 'position:fixed;top:20px;right:20px;z-index:99999;display:flex;flex-direction:column;gap:10px;max-width:380px';
+        document.body.appendChild(container);
+    }
+    var icons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ' };
+    var colors = { success: '#059669', error: '#dc2626', warning: '#d97706', info: '#2563eb' };
+    var toast = document.createElement('div');
+    toast.style.cssText = 'display:flex;align-items:center;gap:10px;padding:14px 18px;border-radius:10px;background:' + (colors[type] || colors.info) + ';color:white;font-size:14px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,0.15);transform:translateX(120%);opacity:0;transition:all .35s cubic-bezier(0.4,0,0.2,1)';
+    toast.innerHTML = '<span style="font-size:18px;flex-shrink:0">' + (icons[type] || icons.info) + '</span><span>' + message + '</span>';
+    (document.getElementById('tmi-toast-container') || document.body).appendChild(toast);
+    requestAnimationFrame(function() {
+        toast.style.transform = 'translateX(0)';
+        toast.style.opacity = '1';
+    });
+    setTimeout(function() {
+        toast.style.transform = 'translateX(120%)';
+        toast.style.opacity = '0';
+        setTimeout(function() { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 350);
+    }, 4500);
+};
+
 TMI.injectSkeletonStyles = function() {
     if (document.getElementById('tmi-skeleton-styles')) return;
     var style = document.createElement('style');
@@ -296,6 +322,24 @@ TMI.hideSkeletons = function(parentSelector) {
     });
 };
 
+TMI.healthCheck = function() {
+    var endpoints = [
+        { name: 'Registration Status', url: '/api/registration-status' },
+        { name: 'Registrations', url: '/api/registrations' },
+    ];
+    endpoints.forEach(function(ep) {
+        fetch(ep.url).then(function(r) { return r.json(); }).then(function(resp) {
+            if (resp && resp.success !== false) {
+                console.log('✓ ' + ep.name + ': OK');
+            } else {
+                TMI.showToast(ep.name + ': unexpected response', 'warning');
+            }
+        }).catch(function(err) {
+            TMI.showToast(ep.name + ' unreachable — ' + err.message, 'error');
+        });
+    });
+};
+
 (function() {
     TMI.injectSkeletonStyles();
     TMI.fetchRegStatusAPI().then(function() {
@@ -305,6 +349,7 @@ TMI.hideSkeletons = function(parentSelector) {
     function boot() {
         TMI.applyAccessibilitySettings();
         TMI.renderProfileAvatar(document.getElementById('headerAvatar'));
+        TMI.healthCheck();
     }
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', boot);
