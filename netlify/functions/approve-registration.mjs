@@ -2,7 +2,6 @@ import { ConvexHttpClient } from "convex/browser"
 import QRCode from "qrcode"
 import nodemailer from "nodemailer"
 import crypto from "crypto"
-import sharp from "sharp"
 import fs from "fs"
 import path from "path"
 
@@ -24,89 +23,6 @@ function pickBackground() {
 function escapeHtml(str) {
   if (!str) return ""
   return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
-}
-
-async function generateTicketImage(reg, ticketId, qrDataUri, sig) {
-  const { num, bgPath } = pickBackground()
-
-  let bgBuffer
-  if (fs.existsSync(bgPath)) {
-    bgBuffer = await sharp(bgPath).resize(800, 1100, { fit: "cover" }).png().toBuffer()
-  } else {
-    bgBuffer = await sharp({
-      create: { width: 800, height: 1100, channels: 3, background: { r: 238, g: 244, b: 255 } }
-    }).png().toBuffer()
-  }
-
-  const name = escapeHtml(reg.firstName + " " + reg.lastName)
-  const team = escapeHtml(reg.teamName || "Unassigned")
-  const track = escapeHtml(reg.hackathonTrack || "General")
-
-  const cardX = 80
-  const cardY = 140
-  const cardW = 640
-  const cardH = 820
-  const cardR = 32
-
-  const logoBase64 = await getLogoBase64()
-  const logoSrc = logoBase64 ? `data:image/png;base64,${logoBase64}` : ""
-
-  const svg = `
-<svg width="800" height="1100" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <filter id="shadow" x="-5%" y="-5%" width="115%" height="115%">
-      <feDropShadow dx="0" dy="4" stdDeviation="12" flood-color="#000" flood-opacity="0.08"/>
-    </filter>
-  </defs>
-
-  <rect x="${cardX}" y="${cardY}" width="${cardW}" height="${cardH}" rx="${cardR}" ry="${cardR}"
-        fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5" filter="url(#shadow)"/>
-
-  <image x="340" y="180" width="120" height="120" href="${logoSrc}"/>
-
-  <text x="400" y="345" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="900" letter-spacing="-1">
-    <tspan fill="#000000">TM</tspan><tspan fill="#2563eb">I</tspan><tspan fill="#1e293b"> HACKATHON</tspan>
-  </text>
-  <text x="400" y="370" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#2563eb" letter-spacing="3">OFFICIAL ENTRY PASS</text>
-
-  <line x1="120" y1="400" x2="680" y2="400" stroke="#e2e8f0" stroke-width="1"/>
-
-  <text x="400" y="460" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="800" fill="#1e293b">${name}</text>
-
-  <rect x="290" y="478" width="220" height="28" rx="14" ry="14" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1"/>
-  <text x="400" y="497" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" fill="#2563eb" letter-spacing="1.5">PARTICIPANT</text>
-
-  <text x="400" y="545" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#64748b" font-weight="600">Team: ${team}  •  ${track}</text>
-
-  <image x="250" y="580" width="300" height="300" href="${qrDataUri}"/>
-
-  <text x="400" y="910" text-anchor="middle" font-family="Courier New, monospace" font-size="14" fill="#94a3b8" letter-spacing="1.5">${escapeHtml(ticketId)}</text>
-
-  <text x="400" y="940" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#cbd5e1" font-weight="600" letter-spacing="1.5">SCAN AT ENTRANCE FOR VALIDATION</text>
-</svg>`
-
-  const svgBuffer = Buffer.from(svg)
-
-  const final = await sharp(bgBuffer)
-    .composite([{ input: svgBuffer, top: 0, left: 0 }])
-    .png({ quality: 90 })
-    .toBuffer()
-
-  return { imageBuffer: final, bgIndex: num }
-}
-
-let _logoBase64 = null
-async function getLogoBase64() {
-  if (_logoBase64) return _logoBase64
-  const logoPath = path.resolve(process.cwd(), "assets", "tmi-logo.png")
-  if (fs.existsSync(logoPath)) {
-    const buf = fs.readFileSync(logoPath)
-    const resized = await sharp(buf).resize(120, 120).png().toBuffer()
-    _logoBase64 = resized.toString("base64")
-  } else {
-    _logoBase64 = ""
-  }
-  return _logoBase64
 }
 
 export async function handler(event) {
@@ -155,7 +71,10 @@ export async function handler(event) {
     const smtpPass = process.env.SMTP_PASS
 
     if (smtpHost && smtpUser) {
-      const { imageBuffer, bgIndex } = await generateTicketImage(reg, ticketId, qrDataUri, sig)
+      const { num, bgPath } = pickBackground()
+      const name = escapeHtml(reg.firstName + " " + reg.lastName)
+      const team = escapeHtml(reg.teamName || "Unassigned")
+      const track = escapeHtml(reg.hackathonTrack || "General")
 
       const transporter = nodemailer.createTransport({
         host: smtpHost,
@@ -164,7 +83,22 @@ export async function handler(event) {
         auth: { user: smtpUser, pass: smtpPass },
       })
 
-      const attachmentName = `TMI-Hackathon-Ticket-${ticketId}.png`
+      const bgCid = "ticket-bg"
+      const bgExists = fs.existsSync(bgPath)
+      const attachments = []
+
+      if (bgExists) {
+        attachments.push({
+          filename: `ticket-background.png`,
+          content: fs.readFileSync(bgPath),
+          contentType: "image/png",
+          cid: bgCid
+        })
+      }
+
+      const bgStyle = bgExists
+        ? `background-image:url(cid:${bgCid});background-size:cover;background-position:center;background-repeat:no-repeat;background-color:#eef4ff`
+        : "background-color:#eef4ff"
 
       await transporter.sendMail({
         from: smtpUser,
@@ -174,24 +108,62 @@ export async function handler(event) {
 <!DOCTYPE html>
 <html>
 <head><meta charset="UTF-8"></head>
-<body style="margin:0;padding:0;background:#eef4ff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#eef4ff">
+<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="${bgStyle}">
     <tr>
-      <td align="center" style="padding:32px 16px">
-        <p style="font-size:14px;color:#475569;margin:0 0 4px">Your entry ticket is attached to this email.</p>
-        <p style="font-size:13px;color:#64748b;margin:0 0 20px">Please download and save it, or print it out for check-in.</p>
-        <p style="font-size:13px;color:#94a3b8;margin:0">Ticket: <strong style="color:#2563eb;font-family:monospace">${ticketId}</strong></p>
+      <td align="center" style="padding:40px 16px">
+        <table role="presentation" style="width:100%;max-width:420px;margin:0 auto;background:#ffffff;border-radius:24px;border:1px solid #e2e8f0">
+          <tr>
+            <td align="center" style="padding:32px 24px 0">
+              <table role="presentation" style="width:64px;height:64px;border:1px solid #e2e8f0;border-radius:16px;margin:0 auto 12px">
+                <tr><td align="center" style="padding:4px">
+                  <img src="https://tmi-form-handler.netlify.app/assets/tmi-logo.png" alt="TMI" width="56" height="56" style="display:block;border:0">
+                </td></tr>
+              </table>
+              <p style="margin:0;font-size:26px;font-weight:900;letter-spacing:-1px">
+                <span style="color:#000">TM</span><span style="color:#2563eb">I</span><span style="color:#1e293b"> HACKATHON</span>
+              </p>
+              <p style="margin:2px 0 0;font-size:11px;font-weight:700;color:#2563eb;text-transform:uppercase;letter-spacing:2px">Official Entry Pass</p>
+            </td>
+          </tr>
+          <tr><td style="padding:0 24px"><hr style="border:none;border-top:1px solid #e2e8f0;margin:0"></td></tr>
+          <tr>
+            <td align="center" style="padding:24px 24px 0">
+              <p style="margin:0 0 4px;font-size:24px;font-weight:800;color:#1e293b">${name}</p>
+              <table role="presentation" style="margin:0 auto 12px">
+                <tr>
+                  <td style="padding:4px 14px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:20px;font-size:11px;font-weight:700;color:#2563eb;text-transform:uppercase;letter-spacing:1px">PARTICIPANT</td>
+                </tr>
+              </table>
+              <p style="margin:0 0 20px;font-size:13px;color:#64748b;font-weight:500">Team: ${team} • ${track}</p>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding:0 24px">
+              <table role="presentation" style="padding:8px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;margin:0 auto">
+                <tr><td><img src="${qrDataUri}" alt="QR Code" width="180" height="180" style="display:block;border:0"></td></tr>
+              </table>
+              <p style="margin:12px 0 0;font-family:monospace;font-size:12px;color:#94a3b8;letter-spacing:1px">${escapeHtml(ticketId)}</p>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding:16px 24px 24px">
+              <p style="margin:0;font-size:11px;color:#cbd5e1;font-weight:600;text-transform:uppercase;letter-spacing:1px">Scan at entrance for validation</p>
+            </td>
+          </tr>
+          <tr><td style="padding:0 24px"><hr style="border:none;border-top:1px solid #e2e8f0;margin:0"></td></tr>
+          <tr>
+            <td align="center" style="padding:12px 24px">
+              <p style="margin:0;font-size:10px;color:#94a3b8">This ticket is cryptographically signed. Tampering will invalidate it.</p>
+            </td>
+          </tr>
+        </table>
       </td>
     </tr>
   </table>
 </body>
 </html>`,
-        attachments: [{
-          filename: attachmentName,
-          content: imageBuffer,
-          contentType: "image/png",
-          cid: "ticket-attachment"
-        }]
+        attachments
       })
 
       await client.mutation("registrations:updateStatus", {
