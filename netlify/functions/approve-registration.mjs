@@ -86,9 +86,9 @@ export async function handler(event) {
 
       const bgUrl = `https://tmi-form-handler.netlify.app/assets/tmi-ticket-background${num}.png`
 
-      const bgImg = bgExists
-        ? `<img src="${bgUrl}" width="600" style="display:block;max-width:100%;height:auto;border:0" />`
-        : ""
+      const bgStyles = bgExists
+        ? `background-image:url('${bgUrl}');background-size:cover;background-position:center;background-repeat:no-repeat;background-color:#eef4ff`
+        : "background-color:#eef4ff"
 
       await transporter.sendMail({
         from: '"TMI Hackathon" <' + smtpUser + '>',
@@ -99,15 +99,15 @@ export async function handler(event) {
 <html>
 <head><meta charset="UTF-8"></head>
 <body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#eef4ff" style="background-color:#eef4ff">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#eef4ff" style="${bgStyles}">
     <tr>
-      <td align="center" style="padding:0;font-size:0;line-height:0">
-        ${bgImg}
-      </td>
-    </tr>
-    <tr>
-      <td align="center" style="padding:0 16px 40px">
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" align="center" style="max-width:420px;margin:-60px auto 0;background:#ffffff;border-radius:24px;border:1px solid #e2e8f0">
+      <td align="center" style="padding:40px 16px">
+        <!--[if gte mso 9]>
+        <v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="width:600px;height:800px">
+          <v:fill type="frame" src="${bgUrl}" />
+          <v:textbox inset="0,0,0,0" style="mso-fit-shape-to-text:true">
+        <![endif]-->
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" align="center" style="max-width:420px;margin:0 auto;background:#ffffff;border-radius:24px;border:1px solid #e2e8f0">
           <tr>
             <td align="center" style="padding:32px 24px 0">
               <table role="presentation" style="width:64px;height:64px;border:1px solid #e2e8f0;border-radius:16px;margin:0 auto 12px">
@@ -153,6 +153,10 @@ export async function handler(event) {
             </td>
           </tr>
         </table>
+        <!--[if gte mso 9]>
+          </v:textbox>
+        </v:rect>
+        <![endif]-->
       </td>
     </tr>
   </table>
