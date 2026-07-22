@@ -1,5 +1,5 @@
 [build]
-  command = "bash -c 'HASH=$(git rev-parse --short HEAD 2>/dev/null || date +%s); for f in index.html pages/*.html; do sed -i \"s/app\\.js\\?v=[a-z0-9]*/app.js?v=$HASH/g\" \"$f\"; done; echo \"Cache-bust: app.js?v=$HASH\"'"
+  command = "bash -c 'HASH=$(git rev-parse --short HEAD 2>/dev/null || date +%s); for f in index.html pages/*.html; do sed -i \"s/app\\.js?v=[a-z0-9]*/app.js?v=$HASH/g\" \"$f\"; done; echo \"Cache-bust: app.js?v=$HASH\"'"
   publish = "."
 
 [functions]
