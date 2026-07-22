@@ -38,6 +38,7 @@
 
 [[redirects]]
   from = "/participant-ticket.html"
+  to = "/"
   status = 404
 
 [[headers]]
