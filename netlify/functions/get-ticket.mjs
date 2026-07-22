@@ -21,6 +21,14 @@ export async function handler(event) {
     const reg = await client.query("registrations:getByTicketId", { ticketId })
     if (!reg) return { statusCode: 404, headers, body: JSON.stringify({ success: false, error: "Ticket not found" }) }
 
+    function maskEmail(email) {
+      if (!email || !email.includes('@')) return email;
+      var parts = email.split('@');
+      var name = parts[0];
+      var masked = name.length <= 2 ? name[0] + '***' : name.slice(0, 2) + '***' + name.slice(-1);
+      return masked + '@' + parts[1];
+    }
+
     return {
       statusCode: 200,
       headers,
@@ -32,7 +40,7 @@ export async function handler(event) {
           lastName: reg.lastName,
           teamName: reg.teamName,
           hackathonTrack: reg.hackathonTrack,
-          email: reg.email,
+          email: maskEmail(reg.email),
           status: reg.status,
           ticketSent: reg.ticketSent,
           checkedInAt: reg.checkedInAt,
