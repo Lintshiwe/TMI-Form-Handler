@@ -32,19 +32,22 @@ export async function handler(event) {
     if (!registrationId) return { statusCode: 400, headers, body: JSON.stringify({ success: false, error: "registrationId required" }) }
 
     const client = new ConvexHttpClient(convexUrl)
-    const ticketId = generateTicketId()
-    const sig = signData(ticketId, ticketSecret)
 
     const allRegs = await client.query("registrations:getAll")
     const reg = allRegs.find(r => r._id === registrationId)
     if (!reg) return { statusCode: 404, headers, body: JSON.stringify({ success: false, error: "Registration not found" }) }
 
-    await client.mutation("registrations:updateStatus", {
-      id: registrationId,
-      status: "Approved",
-      ticketId,
-      ticketSent: false,
-    })
+    const ticketId = reg.ticketId || generateTicketId()
+    const sig = signData(ticketId, ticketSecret)
+
+    if (reg.status !== "Approved" || !reg.ticketId) {
+      await client.mutation("registrations:updateStatus", {
+        id: registrationId,
+        status: "Approved",
+        ticketId,
+        ticketSent: false,
+      })
+    }
 
     const qrPayload = JSON.stringify({ ticketId, name: reg.firstName + " " + reg.lastName, sig })
     const qrDataUri = await QRCode.toDataURL(qrPayload, { width: 300, margin: 2, color: { dark: "#0f172a", light: "#ffffff" } })
