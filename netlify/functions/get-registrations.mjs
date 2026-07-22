@@ -1,3 +1,5 @@
+import { getStore } from '@netlify/blobs';
+
 export async function handler(event) {
   const headers = {
     "Access-Control-Allow-Origin": "*",
@@ -9,26 +11,28 @@ export async function handler(event) {
     return { statusCode: 204, headers, body: "" };
   }
 
-  const convexUrl = process.env.CONVEX_URL;
-  if (!convexUrl) {
-    return {
-      statusCode: 500,
-      headers,
-      body: JSON.stringify({ success: false, error: "CONVEX_URL not set" }),
-    };
-  }
-
   try {
-    const res = await fetch(`${convexUrl}/query/getRegistrations:getAll`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ args: {} }),
-    });
-    const data = await res.json();
+    const siteID = process.env.SITE_ID;
+    const token = process.env.NETLIFY_ACCESS_TOKEN;
+    if (!siteID || !token) {
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({
+          success: false,
+          error: !siteID ? "SITE_ID not available" : "NETLIFY_ACCESS_TOKEN not set"
+        })
+      };
+    }
+
+    const store = getStore({ name: 'tmi-registrations', siteID, token });
+    const data = await store.get('registrations', { type: 'json' });
+    const registrations = Array.isArray(data) ? data : [];
+
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify({ success: true, data }),
+      body: JSON.stringify({ success: true, data: registrations }),
     };
   } catch (err) {
     return {

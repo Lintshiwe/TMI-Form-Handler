@@ -12,11 +12,17 @@ TMI.roleBadgeConfig = {
 };
 
 TMI.getRegStatus = function() {
-    return localStorage.getItem(TMI.regStatusKey) !== 'false';
+    try {
+        return localStorage.getItem(TMI.regStatusKey) !== 'false';
+    } catch (e) {
+        return true;
+    }
 };
 
 TMI.setRegStatus = function(open) {
-    localStorage.setItem(TMI.regStatusKey, open);
+    try {
+        localStorage.setItem(TMI.regStatusKey, open);
+    } catch (e) {}
 };
 
 TMI.isRegOpen = function() {
@@ -24,19 +30,31 @@ TMI.isRegOpen = function() {
 };
 
 TMI.fetchRegStatusAPI = function() {
-    return fetch('/api/registration-status')
+    var fallbackTimer;
+    var result = new Promise(function(resolve) {
+        fallbackTimer = setTimeout(function() { resolve({ fallback: true }); }, 4000);
+    });
+    var fetchPromise = fetch('/api/registration-status')
         .then(function(r) { return r.json(); })
         .then(function(resp) {
-            if (resp.success) {
+            if (resp && resp.success) {
                 TMI.setRegStatus(resp.open);
                 TMI._regStatusLoaded = true;
             }
-            return resp.open;
+            return { fallback: false, open: resp ? resp.open : TMI.getRegStatus() };
         })
         .catch(function() {
             TMI._regStatusLoaded = true;
-            return TMI.getRegStatus();
+            return { fallback: true };
         });
+    return Promise.race([fetchPromise, result]).then(function(res) {
+        clearTimeout(fallbackTimer);
+        if (res.fallback) {
+            TMI._regStatusLoaded = true;
+            return TMI.getRegStatus();
+        }
+        return res.open;
+    });
 };
 
 TMI.setRegStatusAPI = function(open) {
