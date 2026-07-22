@@ -1,5 +1,20 @@
 import { ConvexHttpClient } from "convex/browser"
 
+const botKeywords = [
+  "ignore previous", "ignore all", "disregard", "forget", "ignore your",
+  "you are an ai", "as an ai", "language model", "llm", "prompt",
+  "you must", "you will", "ignore the", "system prompt", "instruction",
+]
+
+function isBotSubmission(body) {
+  if (body.hpField || body.website || body.url) return true
+  var text = JSON.stringify(body).toLowerCase()
+  for (var i = 0; i < botKeywords.length; i++) {
+    if (text.indexOf(botKeywords[i]) !== -1) return true
+  }
+  return false
+}
+
 export async function handler(event) {
   const headers = {
     "Access-Control-Allow-Origin": "*",
@@ -22,6 +37,11 @@ export async function handler(event) {
     }
 
     const body = JSON.parse(event.body)
+
+    if (isBotSubmission(body)) {
+      return { statusCode: 200, headers, body: JSON.stringify({ success: true }) }
+    }
+
     const client = new ConvexHttpClient(convexUrl)
     await client.mutation("registrations:register", body)
 
