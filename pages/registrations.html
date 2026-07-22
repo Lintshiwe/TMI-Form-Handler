@@ -226,6 +226,9 @@
         </nav>
 
         <div class="content-area" id="page-content">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+                <button id="batchApproveBtn" onclick="batchApprove()" style="display:none;padding:10px 24px;background:#2563eb;color:white;border:none;border-radius:10px;font-weight:600;cursor:pointer;font-size:14px">Approve Selected (0)</button>
+            </div>
             <div class="filter-bar">
                 <div class="filter-dropdown">
                     <select id="filterStatus" onchange="applyFilters()">
@@ -274,7 +277,7 @@
                             <th style="width:50px;"><input type="checkbox" class="row-checkbox" id="selectAll" onclick="toggleSelectAll()"></th>
                             <th>Name</th><th>Email</th><th>Track/Category</th>
                             <th>Province</th><th>Team Name</th>
-                            <th>Registration Date</th><th>Status</th>
+                            <th>Registration Date</th><th>Status</th><th>Ticket</th>
                             <th style="width:60px;">Actions</th>
                         </tr>
                     </thead>
@@ -333,11 +336,13 @@
                 '<td>' + (r.teamName || '-') + '</td>' +
                 '<td>' + TMI.formatDate(r.createdAt) + '</td>' +
                 '<td>' + TMI.getStatusBadge(r) + '</td>' +
+                '<td>' + (r.ticketId ? (r.ticketSent ? '📩 Sent' : '📱 Generated') : '-') + '</td>' +
                 '<td class="action-cell">' +
                     '<button class="action-btn" onclick="toggleMenu(event, this)">' +
                         '<svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>' +
                     '</button>' +
                     '<div class="action-menu">' +
+                        (r.status !== 'Approved' && r.status !== 'Checked In' ? '<button onclick="approveRegistration(\'' + r._id + '\', \'' + name.replace(/'/g, "\\'") + '\')">Approve ✅</button>' : '') +
                         '<button onclick="viewDetails(\'' + name.replace(/'/g, "\\'") + '\')">View Details</button>' +
                         '<button class="danger" onclick="deleteRow(\'' + name.replace(/'/g, "\\'") + '\')">Delete</button>' +
                     '</div>' +
@@ -405,6 +410,93 @@
 
     function closeMenus() {
         document.querySelectorAll('.action-menu.show').forEach(function(m) { m.classList.remove('show'); });
+    }
+
+    document.getElementById('selectAll').addEventListener('change', function() {
+        var btn = document.getElementById('batchApproveBtn');
+        var checked = document.querySelectorAll('.row-cb:checked').length;
+        if (checked > 0) {
+            btn.style.display = '';
+            btn.textContent = 'Approve Selected (' + checked + ')';
+        } else {
+            btn.style.display = 'none';
+        }
+    });
+
+    document.addEventListener('change', function(e) {
+        if (e.target.classList.contains('row-cb')) {
+            var btn = document.getElementById('batchApproveBtn');
+            var checked = document.querySelectorAll('.row-cb:checked').length;
+            if (checked > 0) {
+                btn.style.display = '';
+                btn.textContent = 'Approve Selected (' + checked + ')';
+            } else {
+                btn.style.display = 'none';
+            }
+        }
+    });
+
+    function approveRegistration(id, name) {
+        if (!confirm('Approve ' + name + '? This will generate a QR ticket and email it.')) return;
+        fetch('/api/approve-registration', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ registrationId: id }),
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(json) {
+            if (json.success) {
+                TMI.showToast(name + ' approved! Ticket: ' + json.ticketId, 'success');
+                TMI.fetchRegistrations().then(initPage);
+            } else {
+                TMI.showToast('Error: ' + (json.error || 'Unknown'), 'error');
+            }
+        })
+        .catch(function(err) {
+            TMI.showToast('Network error: ' + err.message, 'error');
+        });
+    }
+
+    function batchApprove() {
+        var ids = [];
+        var rows = document.querySelectorAll('#tableBody tr');
+        var checkboxes = document.querySelectorAll('.row-cb:checked');
+        checkboxes.forEach(function(cb) {
+            var row = cb.closest('tr');
+            if (row) {
+                var idx = Array.from(row.parentNode.children).indexOf(row);
+                var reg = filteredData.slice((currentPage - 1) * perPage, currentPage * perPage)[idx];
+                if (reg && reg.status !== 'Approved' && reg.status !== 'Checked In') {
+                    ids.push(reg._id);
+                }
+            }
+        });
+        if (!ids.length) { TMI.showToast('No pending registrations selected', 'warning'); return; }
+        if (!confirm('Approve ' + ids.length + ' registration(s)? Tickets will be generated and emailed.')) return;
+
+        var done = 0, errors = 0;
+        ids.forEach(function(id) {
+            fetch('/api/approve-registration', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ registrationId: id }),
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(json) {
+                if (json.success) { done++; } else { errors++; }
+                if (done + errors === ids.length) {
+                    TMI.showToast(done + ' approved, ' + errors + ' errors', errors ? 'warning' : 'success');
+                    TMI.fetchRegistrations().then(initPage);
+                }
+            })
+            .catch(function() {
+                errors++;
+                if (done + errors === ids.length) {
+                    TMI.showToast(done + ' approved, ' + errors + ' errors', 'warning');
+                    TMI.fetchRegistrations().then(initPage);
+                }
+            });
+        });
     }
 
     document.addEventListener('click', closeMenus);
