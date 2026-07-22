@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png" href="../assets/favicon.png">
     <title>All Registrations - Registration Dashboard</title>
     <link rel="stylesheet" href="../assets/styles.css">
-    <script src="../assets/app.js?v=df446d2"></script>
+    <script src="../assets/app.js?v=5a1efa1"></script>
     <style>
         body { padding: 0; }
         .dashboard-container {
@@ -343,7 +343,7 @@
                     '</button>' +
                     '<div class="action-menu">' +
                         (r.status !== 'Approved' && r.status !== 'Checked In' ? '<button onclick="approveRegistration(\'' + r._id + '\', \'' + name.replace(/'/g, "\\'") + '\')">Approve ✅</button>' : '') +
-                        '<button onclick="viewDetails(\'' + name.replace(/'/g, "\\'") + '\')">View Details</button>' +
+                        '<button onclick="viewDetails(\'' + r._id + '\')">View Details</button>' +
                         '<button class="danger" onclick="deleteRow(\'' + name.replace(/'/g, "\\'") + '\')">Delete</button>' +
                     '</div>' +
                 '</td>' +
@@ -400,7 +400,47 @@
         menu.classList.toggle('show');
     }
 
-    function viewDetails(name) { alert('Viewing details for: ' + name); closeMenus(); }
+    function viewDetails(id) {
+        closeMenus();
+        var r = TMI.registrations.find(function(x) { return x._id === id; });
+        if (!r) { alert('Registration not found.'); return; }
+        var existing = document.getElementById('detailsModal');
+        if (existing) existing.remove();
+        var backdrop = document.createElement('div');
+        backdrop.id = 'detailsModal';
+        backdrop.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
+        var fields = [
+            ['Name', TMI.getFullName(r)],
+            ['Email', r.email || '-'],
+            ['Phone', r.phone || '-'],
+            ['Team', r.teamName || '-'],
+            ['Track', r.hackathonTrack || '-'],
+            ['Province', TMI.getProvince(r)],
+            ['Status', r.status || 'Pending'],
+            ['Registered', TMI.formatDate(r.createdAt)],
+            ['Ticket ID', r.ticketId || 'Not issued'],
+            ['Checked In', r.checkedInAt ? TMI.formatDate(r.checkedInAt) : 'No'],
+        ];
+        if (r.institution) fields.splice(5, 0, ['Institution', r.institution]);
+        if (r.motivation) fields.push(['Motivation', r.motivation]);
+        backdrop.innerHTML =
+            '<div style="background:white;border-radius:16px;padding:32px;max-width:520px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.25)">' +
+                '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">' +
+                    '<h2 style="font-size:20px;font-weight:700;color:#1a1a2e;margin:0">Registration Details</h2>' +
+                    '<button onclick="document.getElementById(\'detailsModal\').remove()" style="background:none;border:none;cursor:pointer;padding:4px;border-radius:8px">' +
+                        '<svg viewBox="0 0 24 24" width="24" height="24" fill="#6b7280"><path d="M18.3 5.71L12 12l6.3 6.29-1.42 1.42L12 13.41l-5.29 5.3-1.42-1.42L10.59 12 5.3 6.71l1.42-1.42L12 10.59l5.29-5.3 1.42 1.42z"/></svg>' +
+                    '</button>' +
+                '</div>' +
+                fields.map(function(f) {
+                    return '<div style="display:flex;padding:10px 0;border-bottom:1px solid #f3f4f6">' +
+                        '<span style="width:130px;font-size:13px;font-weight:600;color:#6b7280;flex-shrink:0">' + f[0] + '</span>' +
+                        '<span style="font-size:14px;color:#1f2937">' + f[1] + '</span>' +
+                    '</div>';
+                }).join('') +
+            '</div>';
+        document.body.appendChild(backdrop);
+        backdrop.addEventListener('click', function(e) { if (e.target === backdrop) backdrop.remove(); });
+    }
     function deleteRow(name) {
         if (confirm('Delete ' + name + '?')) {
             alert('Note: Delete requires admin API. Registration: ' + name);
