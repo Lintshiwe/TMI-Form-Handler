@@ -4,7 +4,10 @@
 
 [functions]
   directory = "netlify/functions"
-  node_bundler = "nft"
+  node_bundler = "esbuild"
+
+[functions.approve-registration]
+  external_node_modules = ["sharp"]
 
 [[redirects]]
   from = "/api/registrations"
