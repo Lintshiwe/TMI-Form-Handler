@@ -357,9 +357,12 @@
                         </div>
                         <button class="save-btn" onclick="saveGeneral()">Save</button>
                         <div style="margin-top:24px;padding-top:24px;border-top:1px solid #e5e7eb">
+                            <div style="padding:12px 16px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;margin-bottom:16px;font-size:13px;color:#dc2626;font-weight:600">
+                                ⚠ The form at fanciful-kringle-a1224b.netlify.app is still accepting because it doesn't have the embed script yet. Copy the code below and paste it into the <code>&lt;head&gt;</code> of that page.
+                            </div>
                             <h3 style="font-size:16px;font-weight:700;color:#1a1a2e;margin-bottom:8px">Registration Site Sync</h3>
                             <p style="font-size:13px;color:#6b7280;margin-bottom:12px">
-                                Add this script to your registration form's <code>&lt;head&gt;</code> to respect the dashboard's registration status:
+                                Paste this script inside the <code>&lt;head&gt;</code> tag of your registration form page at fanciful-kringle-a1224b.netlify.app:
                             </p>
                             <div style="position:relative">
                                 <textarea id="embedCode" readonly rows="7"
@@ -521,45 +524,9 @@
 
     function generateEmbedCode() {
         var siteUrl = window.location.origin;
-        return '<!-- Add this inside <head> on your registration site -->\n' +
-        '<script>\n' +
-        '(function() {\n' +
-        '  var checkStatus = function() {\n' +
-        '    var params = new URLSearchParams(window.location.search);\n' +
-        '    var status = params.get("reg");\n' +
-        '    if (status === "open" || status === "closed") {\n' +
-        '      applyStatus(status === "open");\n' +
-        '      return;\n' +
-        '    }\n' +
-        '    var xhr = new XMLHttpRequest();\n' +
-        '    xhr.open("GET", "' + siteUrl + '/api/registration-status", true);\n' +
-        '    xhr.onload = function() {\n' +
-        '      try {\n' +
-        '        var resp = JSON.parse(xhr.responseText);\n' +
-        '        applyStatus(resp.open !== false);\n' +
-        '      } catch(e) { applyStatus(true); }\n' +
-        '    };\n' +
-        '    xhr.onerror = function() { applyStatus(true); };\n' +
-        '    xhr.send();\n' +
-        '  };\n' +
-        '  var applied = false;\n' +
-        '  function applyStatus(isOpen) {\n' +
-        '    if (applied) return; applied = true;\n' +
-        '    if (!isOpen) {\n' +
-        '      document.addEventListener("DOMContentLoaded", function() {\n' +
-        '        document.body.innerHTML =\n' +
-        '          \'<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;text-align:center;padding:20px">\' +\n' +
-        '          \'<div><h1 style="color:#dc2626;font-size:48px;margin-bottom:16px">Registrations Closed</h1>\' +\n' +
-        '          \'<p style="color:#6b7280;font-size:18px">Registration is currently disabled. Please check back later.</p>\' +\n' +
-        '          \'</div></div>\';\n' +
-        '      });\n' +
-        '    }\n' +
-        '  }\n' +
-        '  if (document.readyState === "loading") {\n' +
-        '    document.addEventListener("DOMContentLoaded", checkStatus);\n' +
-        '  } else { checkStatus(); }\n' +
-        '})();\n' +
-        '<\/script>';
+        var embedSrc = siteUrl + '/embed.js';
+        return '<!-- TMI Registration Check - paste inside <head> -->\n' +
+        '<script src="' + embedSrc + '"><\/script>';
     }
 
     function refreshEmbedCode() {
