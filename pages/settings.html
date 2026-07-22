@@ -605,7 +605,6 @@
     function loadRegStatus() {
         TMI.fetchRegStatusAPI().then(function() {
             updateRegUI();
-            TMI.updateRegBadge();
             TMI.hideSkeletons();
         }).catch(function() {
             updateRegUI();
