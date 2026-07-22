@@ -65,8 +65,6 @@ export async function handler(event) {
         auth: { user: smtpUser, pass: smtpPass },
       })
 
-      const ticketUrl = `https://tmi-form-handler.netlify.app/participant-ticket.html?ticketId=${ticketId}`
-
       await transporter.sendMail({
         from: smtpUser,
         to: reg.email,
@@ -90,7 +88,6 @@ export async function handler(event) {
   .qr img { display: block; max-width: 200px; }
   .ticketId { font-family: monospace; font-size: 12px; color: #94a3b8; margin-top: 12px; }
   .footer { border-top: 1px solid #e2e8f0; padding: 16px; font-size: 11px; color: #94a3b8; text-align: center; }
-  .btn { display: inline-block; margin-top: 16px; padding: 12px 24px; background: #2563eb; color: white; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 14px; }
 </style></head>
 <body>
   <div class="container">
@@ -104,7 +101,6 @@ export async function handler(event) {
       <div class="team">Team: ${reg.teamName || "Unassigned"} • ${reg.hackathonTrack || "General"}</div>
       <div class="qr"><img src="${qrDataUri}" alt="QR Code"></div>
       <div class="ticketId">${ticketId}</div>
-      <a href="${ticketUrl}" class="btn">View Online Ticket</a>
     </div>
     <div class="footer">This ticket is cryptographically signed. Tampering will invalidate it.</div>
   </div>

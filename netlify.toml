@@ -36,6 +36,10 @@
   to = "/.netlify/functions/check-in"
   status = 200
 
+[[redirects]]
+  from = "/participant-ticket.html"
+  status = 404
+
 [[headers]]
   for = "/assets/*"
   [headers.values]
