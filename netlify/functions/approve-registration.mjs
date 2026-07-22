@@ -192,7 +192,7 @@ export async function handler(event) {
         attachments: [],
       })
 
-      await new Promise(resolve => setTimeout(resolve, 60000))
+      await new Promise(resolve => setTimeout(resolve, 15000))
 
       await transporter.sendMail({
         from: '"TMI Hackathon" <' + smtpUser + '>',
