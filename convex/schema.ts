@@ -1,0 +1,36 @@
+import { defineSchema, defineTable } from "convex/server"
+import { v } from "convex/values"
+
+export default defineSchema({
+  registrations: defineTable({
+    firstName: v.string(),
+    lastName: v.string(),
+    dateOfBirth: v.string(),
+    gender: v.string(),
+    address: v.string(),
+    addressLine2: v.optional(v.string()),
+    city: v.string(),
+    state: v.string(),
+    postalCode: v.string(),
+    country: v.string(),
+    teamName: v.string(),
+    hackathonTrack: v.string(),
+    academicYear: v.string(),
+    skills: v.string(),
+    whyJoin: v.string(),
+    tshirtSize: v.string(),
+    howHeard: v.string(),
+    githubHandle: v.string(),
+    whatsapp: v.string(),
+    email: v.string(),
+    emergencyFirstName: v.string(),
+    emergencyLastName: v.string(),
+    emergencyPhone: v.string(),
+    createdAt: v.string(),
+    status: v.string(),
+  }).index("by_status", ["status"]).index("by_createdAt", ["createdAt"]),
+  settings: defineTable({
+    key: v.string(),
+    value: v.string(),
+  }).index("by_key", ["key"]),
+})

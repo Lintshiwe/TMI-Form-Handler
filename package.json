@@ -2,6 +2,7 @@
   "name": "tmi-form-handler",
   "private": true,
   "dependencies": {
-    "@netlify/blobs": "^8.2.0"
+    "@netlify/blobs": "^8.2.0",
+    "convex": "^1.42.3"
   }
 }
