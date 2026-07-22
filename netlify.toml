@@ -1,0 +1,22 @@
+[build]
+  command = "echo 'Static site - no build needed'"
+  publish = "."
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+[[redirects]]
+  from = "/api/registrations"
+  to = "/.netlify/functions/get-registrations"
+  status = 200
+
+[[redirects]]
+  from = "/api/store-registration"
+  to = "/.netlify/functions/store-registration"
+  status = 200
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

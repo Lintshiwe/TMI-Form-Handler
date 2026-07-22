@@ -1,0 +1,4 @@
+.netlify/
+*.log
+.env
+.DS_Store

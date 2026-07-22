@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="../assets/favicon.png">
+    <title>All Registrations - TMI Hackathon Dashboard</title>
+    <link rel="stylesheet" href="../assets/styles.css">
+    <style>
+        body { padding: 0; }
+        .dashboard-container {
+            min-height: 100vh;
+            max-width: 100%;
+            border-radius: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .main-content { flex: 1; }
+        .sidebar { padding-top: 80px; }
+
+        .page-title {
+            font-size: 36px; font-weight: 700;
+            color: #1a1a2e; margin-bottom: 24px;
+            letter-spacing: -0.5px;
+        }
+
+        .filter-bar {
+            display: flex; align-items: center; gap: 16px;
+            margin-bottom: 24px; flex-wrap: wrap;
+        }
+        .filter-dropdown {
+            position: relative; min-width: 180px;
+        }
+        .filter-dropdown select {
+            width: 100%; padding: 12px 40px 12px 16px;
+            border: 1px solid #d1d5db; border-radius: 10px;
+            font-size: 14px; color: #374151;
+            background: white; cursor: pointer;
+            appearance: none; outline: none;
+            transition: border-color 0.2s ease;
+        }
+        .filter-dropdown select:focus { border-color: #2563eb; }
+        .filter-dropdown::after {
+            content: ''; position: absolute;
+            right: 16px; top: 50%; transform: translateY(-50%);
+            width: 0; height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 6px solid #9ca3af;
+            pointer-events: none;
+        }
+        .search-wrapper {
+            flex: 1; min-width: 250px; position: relative;
+        }
+        .search-wrapper input {
+            width: 100%; padding: 12px 16px 12px 44px;
+            border: 1px solid #d1d5db; border-radius: 10px;
+            font-size: 14px; outline: none;
+            transition: border-color 0.2s ease;
+        }
+        .search-wrapper input:focus { border-color: #2563eb; }
+        .search-wrapper input::placeholder { color: #9ca3af; }
+        .search-wrapper svg {
+            position: absolute; left: 14px; top: 50%;
+            transform: translateY(-50%);
+            width: 20px; height: 20px; fill: #9ca3af;
+        }
+
+        .table-container {
+            background: white; border-radius: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            overflow-x: auto;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        thead th {
+            text-align: left; padding: 16px 18px;
+            font-size: 13px; font-weight: 600;
+            color: #6b7280; text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #e5e7eb;
+            white-space: nowrap;
+        }
+        tbody tr {
+            border-bottom: 1px solid #f3f4f6;
+            transition: background 0.15s ease;
+        }
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: #f9fafb; }
+        tbody td {
+            padding: 16px 18px; font-size: 14px;
+            color: #374151; vertical-align: middle;
+        }
+
+        .row-checkbox {
+            width: 18px; height: 18px;
+            accent-color: #2563eb; cursor: pointer;
+        }
+
+        .status-badge {
+            display: inline-block; padding: 6px 18px;
+            border-radius: 20px; font-size: 13px;
+            font-weight: 600; text-align: center;
+            white-space: nowrap;
+        }
+        .status-approved { background: #2563eb; color: white; }
+        .status-pending   { background: #fef3c7; color: #92400e; }
+
+        .action-btn {
+            background: none; border: none; cursor: pointer;
+            padding: 6px; border-radius: 6px;
+            transition: background 0.15s ease;
+        }
+        .action-btn:hover { background: #f3f4f6; }
+        .action-btn svg { width: 20px; height: 20px; fill: #9ca3af; }
+
+        .action-menu {
+            position: absolute; right: 0; top: 100%;
+            background: white; border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+            min-width: 160px; z-index: 100;
+            display: none; padding: 6px 0;
+        }
+        .action-menu.show { display: block; }
+        .action-menu button {
+            display: block; width: 100%;
+            padding: 10px 18px; border: none;
+            background: none; text-align: left;
+            font-size: 14px; color: #374151;
+            cursor: pointer; transition: background 0.15s ease;
+        }
+        .action-menu button:hover { background: #f3f4f6; }
+        .action-menu button.danger { color: #dc2626; }
+
+        .action-cell { position: relative; }
+
+        .reg-status-badge {
+            display: flex; align-items: center; gap: 8px;
+            padding: 8px 16px; border-radius: 9999px;
+            font-size: 13px; font-weight: 600;
+            background: #f3f4f6; color: #374151;
+        }
+        .reg-status-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%; flex-shrink: 0;
+        }
+        .reg-status-dot.open { background: #16a34a; }
+        .reg-status-dot.closed { background: #dc2626; }
+
+        .pagination {
+            display: flex; justify-content: space-between;
+            align-items: center; padding: 20px 18px;
+            border-top: 1px solid #e5e7eb;
+        }
+        .pagination-info {
+            font-size: 14px; color: #6b7280;
+        }
+        .pagination-controls {
+            display: flex; gap: 8px;
+        }
+        .page-btn {
+            width: 36px; height: 36px;
+            border: 1px solid #d1d5db; border-radius: 8px;
+            background: white; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.15s ease;
+        }
+        .page-btn:hover:not(:disabled) {
+            border-color: #2563eb; color: #2563eb;
+        }
+        .page-btn:disabled {
+            opacity: 0.4; cursor: not-allowed;
+        }
+        .page-btn svg { width: 18px; height: 18px; fill: currentColor; }
+
+        @media (max-width: 1024px) {
+            .filter-bar { flex-direction: column; align-items: stretch; }
+            .filter-dropdown { min-width: 100%; }
+            .search-wrapper { min-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+<div class="dashboard-container">
+
+    <div class="header">
+        <div style="display:flex;align-items:center;gap:12px">
+            <img src="../assets/logo-slogan.png" alt="TMI Logo" style="height:36px">
+            <h1>All Registrations</h1>
+        </div>
+        <div class="header-right">
+            <div class="reg-status-badge" id="regStatusBadge">
+                <span class="reg-status-dot" id="regStatusDot"></span>
+                <span id="regStatusText">Loading...</span>
+            </div>
+            <div class="avatar" id="headerAvatar">
+                <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <nav class="sidebar">
+            <a href="../index.html" class="nav-item">
+                <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                Dashboard
+            </a>
+            <a href="registrations.html" class="nav-item active">
+                <svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
+                All Registrations
+            </a>
+            <a href="analytics.html" class="nav-item">
+                <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+                Analytics
+            </a>
+            <a href="settings.html" class="nav-item">
+                <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+                Settings
+            </a>
+        </nav>
+
+        <div class="content-area">
+            <div class="filter-bar">
+                <div class="filter-dropdown">
+                    <select id="filterStatus" onchange="applyFilters()">
+                        <option value="">Status: All</option>
+                        <option value="Approved">Approved</option>
+                        <option value="Pending">Pending</option>
+                    </select>
+                </div>
+                <div class="filter-dropdown">
+                    <select id="filterTrack" onchange="applyFilters()">
+                        <option value="">Track: All Categories</option>
+                    </select>
+                </div>
+                <div class="filter-dropdown">
+                    <select id="filterProvince" onchange="applyFilters()">
+                        <option value="">Province: All Provinces</option>
+                        <option value="Eastern Cape">Eastern Cape</option>
+                        <option value="Free State">Free State</option>
+                        <option value="Gauteng">Gauteng</option>
+                        <option value="KwaZulu-Natal">KwaZulu-Natal</option>
+                        <option value="Limpopo">Limpopo</option>
+                        <option value="Mpumalanga">Mpumalanga</option>
+                        <option value="North West">North West</option>
+                        <option value="Northern Cape">Northern Cape</option>
+                        <option value="Western Cape">Western Cape</option>
+                    </select>
+                </div>
+                <div class="search-wrapper">
+                    <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                    <input type="text" id="searchInput" placeholder="Search participants..." oninput="applyFilters()">
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width:50px;"><input type="checkbox" class="row-checkbox" id="selectAll" onclick="toggleSelectAll()"></th>
+                            <th>Name</th><th>Email</th><th>Track/Category</th>
+                            <th>Province</th><th>Team Name</th>
+                            <th>Registration Date</th><th>Status</th>
+                            <th style="width:60px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                    </tbody>
+                </table>
+
+                <div class="pagination">
+                    <div class="pagination-info" id="paginationInfo">Loading...</div>
+                    <div class="pagination-controls">
+                        <button class="page-btn" id="prevBtn" onclick="changePage(-1)" disabled>
+                            <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+                        </button>
+                        <button class="page-btn" id="nextBtn" onclick="changePage(1)">
+                            <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentPage = 1;
+    const perPage = 10;
+    let filteredData = [];
+
+    function buildTrackOptions() {
+        var sel = document.getElementById('filterTrack');
+        var tracks = {};
+        TMI.registrations.forEach(function(r) {
+            if (r.hackathonTrack) tracks[r.hackathonTrack] = true;
+        });
+        Object.keys(tracks).sort().forEach(function(t) {
+            var opt = document.createElement('option');
+            opt.value = t;
+            opt.textContent = t;
+            sel.appendChild(opt);
+        });
+    }
+
+    function renderTable() {
+        var start = (currentPage - 1) * perPage;
+        var end = start + perPage;
+        var pageData = filteredData.slice(start, end);
+
+        var tbody = document.getElementById('tableBody');
+        tbody.innerHTML = pageData.map(function(r) {
+            var name = TMI.getFullName(r);
+            return '<tr>' +
+                '<td><input type="checkbox" class="row-checkbox row-cb"></td>' +
+                '<td>' + name + '</td>' +
+                '<td>' + (r.email || '-') + '</td>' +
+                '<td>' + (r.hackathonTrack || '-') + '</td>' +
+                '<td>' + TMI.getProvince(r) + '</td>' +
+                '<td>' + (r.teamName || '-') + '</td>' +
+                '<td>' + TMI.formatDate(r.createdAt) + '</td>' +
+                '<td>' + TMI.getStatusBadge(r) + '</td>' +
+                '<td class="action-cell">' +
+                    '<button class="action-btn" onclick="toggleMenu(event, this)">' +
+                        '<svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>' +
+                    '</button>' +
+                    '<div class="action-menu">' +
+                        '<button onclick="viewDetails(\'' + name.replace(/'/g, "\\'") + '\')">View Details</button>' +
+                        '<button class="danger" onclick="deleteRow(\'' + name.replace(/'/g, "\\'") + '\')">Delete</button>' +
+                    '</div>' +
+                '</td>' +
+            '</tr>';
+        }).join('');
+
+        var total = filteredData.length;
+        var showStart = total === 0 ? 0 : start + 1;
+        var showEnd = Math.min(end, total);
+        document.getElementById('paginationInfo').textContent = total ? 'Showing ' + showStart + '-' + showEnd + ' of ' + total.toLocaleString() : 'No registrations';
+
+        document.getElementById('prevBtn').disabled = currentPage <= 1;
+        document.getElementById('nextBtn').disabled = end >= total;
+    }
+
+    function applyFilters() {
+        var search = document.getElementById('searchInput').value.toLowerCase();
+        var status = document.getElementById('filterStatus').value;
+        var track = document.getElementById('filterTrack').value;
+        var province = document.getElementById('filterProvince').value;
+
+        filteredData = TMI.registrations.filter(function(r) {
+            var name = TMI.getFullName(r).toLowerCase();
+            var email = (r.email || '').toLowerCase();
+            var team = (r.teamName || '').toLowerCase();
+            var prov = TMI.getProvince(r).toLowerCase();
+            var matchSearch = !search || name.includes(search) || email.includes(search) || team.includes(search) || prov.includes(search);
+            var matchStatus = !status || (r.status || 'Pending') === status;
+            var matchTrack = !track || (r.hackathonTrack || '') === track;
+            var matchProvince = !province || TMI.getProvince(r) === province;
+            return matchSearch && matchStatus && matchTrack && matchProvince;
+        });
+
+        currentPage = 1;
+        renderTable();
+    }
+
+    function changePage(dir) {
+        currentPage += dir;
+        renderTable();
+    }
+
+    function toggleSelectAll() {
+        var checked = document.getElementById('selectAll').checked;
+        document.querySelectorAll('.row-cb').forEach(function(cb) { cb.checked = checked; });
+    }
+
+    function toggleMenu(e, btn) {
+        e.stopPropagation();
+        var menu = btn.nextElementSibling;
+        document.querySelectorAll('.action-menu.show').forEach(function(m) {
+            if (m !== menu) m.classList.remove('show');
+        });
+        menu.classList.toggle('show');
+    }
+
+    function viewDetails(name) { alert('Viewing details for: ' + name); closeMenus(); }
+    function deleteRow(name) {
+        if (confirm('Delete ' + name + '?')) {
+            alert('Note: Delete requires admin API. Registration: ' + name);
+        }
+        closeMenus();
+    }
+
+    function closeMenus() {
+        document.querySelectorAll('.action-menu.show').forEach(function(m) { m.classList.remove('show'); });
+    }
+
+    document.addEventListener('click', closeMenus);
+
+    function initPage() {
+        filteredData = TMI.registrations.slice();
+        buildTrackOptions();
+        renderTable();
+        TMI.renderProfileAvatar(document.getElementById('headerAvatar'));
+    }
+
+    if (TMI.registrations.length) {
+        initPage();
+    } else {
+        TMI.fetchRegistrations().then(initPage);
+    }
+</script>
+</body>
+</html>

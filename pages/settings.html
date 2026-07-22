@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="../assets/favicon.png">
+    <title>Settings - TMI Hackathon Dashboard</title>
+    <link rel="stylesheet" href="../assets/styles.css">
+    <style>
+        body { padding: 0; background: #f5f5f5; }
+        .dashboard-container {
+            min-height: 100vh;
+            max-width: 100%;
+            border-radius: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .main-content { flex: 1; }
+        .sidebar { padding-top: 80px; }
+
+        .settings-layout {
+            display: flex;
+            gap: 0;
+            min-height: calc(100vh - 80px);
+        }
+        .settings-sidebar {
+            width: 260px;
+            flex-shrink: 0;
+            border-right: 1px solid #e5e7eb;
+            padding: 20px 0;
+        }
+        .settings-sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 24px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+        .settings-sidebar-item:hover {
+            background: #f3f4f6;
+        }
+        .settings-sidebar-item.active {
+            background: #f0f5ff;
+            color: #2563eb;
+            font-weight: 600;
+        }
+        .settings-sidebar-item svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .settings-content {
+            flex: 1;
+            padding: 32px 40px;
+            max-width: 700px;
+        }
+        .settings-content h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 4px;
+        }
+        .settings-content .subtitle {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 24px;
+        }
+
+        .settings-section {
+            display: none;
+        }
+        .settings-section.active {
+            display: block;
+        }
+
+        .settings-section h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            max-width: 480px;
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus {
+            border-color: #2563eb;
+        }
+
+        .save-btn {
+            background: #0f1419;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 9999px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .save-btn:hover {
+            background: #272c30;
+        }
+
+        .about-text {
+            font-size: 15px;
+            color: #374151;
+            line-height: 1.6;
+        }
+        .about-text p { margin-bottom: 12px; }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 28px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            flex-shrink: 0;
+            position: relative;
+        }
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .profile-avatar svg {
+            width: 40px;
+            height: 40px;
+            fill: #9ca3af;
+        }
+        .profile-info {
+            flex: 1;
+        }
+        .profile-info h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin: 0 0 2px 0;
+        }
+        .profile-info p {
+            font-size: 14px;
+            color: #6b7280;
+            margin: 0 0 12px 0;
+        }
+        .upload-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 20px;
+            border: 1px solid #d1d5db;
+            border-radius: 9999px;
+            background: white;
+            font-size: 13px;
+            font-weight: 500;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .upload-btn:hover {
+            background: #f3f4f6;
+            border-color: #2563eb;
+        }
+        .remove-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 20px;
+            border: 1px solid #ef4444;
+            border-radius: 9999px;
+            background: white;
+            font-size: 13px;
+            font-weight: 500;
+            color: #ef4444;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .remove-btn:hover {
+            background: #fef2f2;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 52px;
+            height: 28px;
+            flex-shrink: 0;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background: #d1d5db;
+            border-radius: 28px;
+            transition: 0.25s;
+        }
+        .toggle-slider::before {
+            content: '';
+            position: absolute;
+            height: 22px;
+            width: 22px;
+            left: 3px;
+            bottom: 3px;
+            background: white;
+            border-radius: 50%;
+            transition: 0.25s;
+        }
+        .toggle-switch input:checked + .toggle-slider {
+            background: #16a34a;
+        }
+        .toggle-switch input:checked + .toggle-slider::before {
+            transform: translateX(24px);
+        }
+    </style>
+</head>
+<body>
+<div class="dashboard-container">
+
+    <div class="header">
+        <div style="display:flex;align-items:center;gap:12px">
+            <img src="../assets/logo-slogan.png" alt="TMI Logo" style="height:36px">
+            <h1>Settings</h1>
+        </div>
+        <div class="header-right">
+            <div class="avatar">
+                <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <nav class="sidebar">
+            <a href="../index.html" class="nav-item">
+                <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                Dashboard
+            </a>
+            <a href="registrations.html" class="nav-item">
+                <svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
+                All Registrations
+            </a>
+            <a href="analytics.html" class="nav-item">
+                <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+                Analytics
+            </a>
+            <a href="settings.html" class="nav-item active">
+                <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+                Settings
+            </a>
+        </nav>
+
+        <div class="content-area">
+            <div class="settings-layout">
+                <nav class="settings-sidebar">
+                    <button class="settings-sidebar-item active" onclick="showSection('general')">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+                        General
+                    </button>
+                    <button class="settings-sidebar-item" onclick="showSection('account')">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                        Account
+                    </button>
+                    <button class="settings-sidebar-item" onclick="showSection('accessibility')">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                        Accessibility
+                    </button>
+                    <button class="settings-sidebar-item" onclick="showSection('about')">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                        About
+                    </button>
+                    <button class="settings-sidebar-item" onclick="showSection('integrations')">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+                        Integrated Systems
+                    </button>
+                </nav>
+
+                <div class="settings-content">
+                    <div id="section-general" class="settings-section active">
+                        <h2>General</h2>
+                        <p class="subtitle">Manage your event configuration</p>
+                        <div class="form-group">
+                            <label for="eventName">Event Name</label>
+                            <input type="text" id="eventName" value="TMI Hackathon 2024">
+                        </div>
+                        <div class="form-group">
+                            <label for="maxTeams">Max Teams</label>
+                            <input type="number" id="maxTeams" value="300">
+                        </div>
+                        <div class="form-group">
+                            <label for="regDeadline">Registration Deadline</label>
+                            <input type="date" id="regDeadline" value="2024-04-15">
+                        </div>
+                        <div class="form-group">
+                            <label for="defaultStatus">Default Approval Status</label>
+                            <select id="defaultStatus">
+                                <option value="Pending">Pending</option>
+                                <option value="Approved">Approved</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Registration Status</label>
+                            <div style="display:flex;align-items:center;gap:12px;margin-top:4px">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="regToggle">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                                <span id="regStatusLabel" style="font-size:14px;font-weight:600;color:#6b7280">Loading...</span>
+                            </div>
+                            <span class="sub-label" style="display:block;font-size:13px;color:#9ca3af;margin-top:4px">
+                                When disabled, the registration form at fanciful-kringle-a1224b.netlify.app will show "Registrations Closed"
+                            </span>
+                        </div>
+                        <button class="save-btn" onclick="saveGeneral()">Save</button>
+                        <div style="margin-top:24px;padding-top:24px;border-top:1px solid #e5e7eb">
+                            <h3 style="font-size:16px;font-weight:700;color:#1a1a2e;margin-bottom:8px">Registration Site Sync</h3>
+                            <p style="font-size:13px;color:#6b7280;margin-bottom:12px">
+                                Add this script to your registration form's <code>&lt;head&gt;</code> to respect the dashboard's registration status:
+                            </p>
+                            <div style="position:relative">
+                                <textarea id="embedCode" readonly rows="7"
+                                    style="width:100%;max-width:100%;padding:14px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;font-family:monospace;background:#f8fafc;color:#374151;resize:none;outline:none"></textarea>
+                                <button onclick="copyEmbed()" style="position:absolute;top:10px;right:10px;padding:6px 14px;background:white;border:1px solid #d1d5db;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;color:#374151">Copy</button>
+                            </div>
+                            <div style="margin-top:16px;display:flex;gap:8px">
+                                <a id="regSiteLink" href="https://fanciful-kringle-a1224b.netlify.app" target="_blank"
+                                   style="display:inline-flex;align-items:center;gap:6px;padding:10px 20px;background:#0f1419;color:white;border-radius:9999px;font-size:13px;font-weight:600;text-decoration:none">
+                                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+                                    Open Registration Site
+                                </a>
+                                <a id="regSiteLinkStatus" href="#" target="_blank"
+                                   style="display:inline-flex;align-items:center;gap:6px;padding:10px 20px;background:#2563eb;color:white;border-radius:9999px;font-size:13px;font-weight:600;text-decoration:none">
+                                    Open with Status
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="section-account" class="settings-section">
+                        <h2>Account</h2>
+                        <p class="subtitle">Manage your profile information</p>
+
+                        <div class="profile-header">
+                            <div class="profile-avatar" id="avatarPreview">
+                                <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                            </div>
+                            <div class="profile-info">
+                                <h3>Admin User</h3>
+                                <p>admin@example.com</p>
+                                <div style="display:flex;gap:8px">
+                                    <label class="upload-btn">
+                                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg>
+                                        Upload photo
+                                        <input type="file" accept="image/*" style="display:none" onchange="previewAvatar(event)">
+                                    </label>
+                                    <button class="remove-btn" onclick="removeAvatar()">
+                                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                                        Remove
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="displayName">Display Name</label>
+                            <input type="text" id="displayName" value="Admin User">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" value="admin@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" id="phone" placeholder="+1 (555) 000-0000">
+                        </div>
+                        <div class="form-group">
+                            <label for="bio">Bio</label>
+                            <input type="text" id="bio" placeholder="Tell us about yourself" style="max-width:480px">
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Change Password</label>
+                            <input type="password" id="password" placeholder="Enter new password">
+                        </div>
+                        <button class="save-btn" onclick="alert('Account settings saved!')">Save</button>
+                    </div>
+
+                    <div id="section-accessibility" class="settings-section">
+                        <h2>Accessibility</h2>
+                        <p class="subtitle">Customize your viewing experience</p>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" checked> Enable high contrast mode
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox"> Enable screen reader support
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" checked> Reduce motion
+                            </label>
+                        </div>
+                        <button class="save-btn" onclick="alert('Accessibility settings saved!')">Save</button>
+                    </div>
+
+                    <div id="section-about" class="settings-section">
+                        <h2>About</h2>
+                        <p class="subtitle">About TMI Hackathon Dashboard</p>
+                        <div class="about-text">
+                            <p><strong>TMI Hackathon Dashboard</strong> — Version 1.0.0</p>
+                            <p>Technology Meets Intelligence (TMI) Hackathon management platform for tracking registrations, analytics, and event settings.</p>
+                            <p>Built with modern web standards to provide a seamless event management experience.</p>
+                        </div>
+                    </div>
+
+                    <div id="section-integrations" class="settings-section">
+                        <h2>Integrated Systems</h2>
+                        <p class="subtitle">Manage connected services</p>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" checked> Convex Backend
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" checked> Email Notifications
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox"> Slack Integration
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox"> Discord Webhook
+                            </label>
+                        </div>
+                        <button class="save-btn" onclick="alert('Integration settings saved!')">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showSection(id) {
+        document.querySelectorAll('.settings-section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.settings-sidebar-item').forEach(b => b.classList.remove('active'));
+        document.getElementById('section-' + id).classList.add('active');
+        document.querySelector('.settings-sidebar-item[onclick*="' + id + '"]').classList.add('active');
+    }
+
+    function updateRegUI() {
+        const isOpen = TMI.isRegOpen();
+        const toggle = document.getElementById('regToggle');
+        const label = document.getElementById('regStatusLabel');
+        if (toggle) toggle.checked = isOpen;
+        if (label) {
+            label.textContent = isOpen ? 'Registrations Open' : 'Registrations Closed';
+            label.style.color = isOpen ? '#16a34a' : '#dc2626';
+        }
+    }
+
+    function generateEmbedCode() {
+        var siteUrl = window.location.origin;
+        return '<!-- Add this inside <head> on your registration site -->\n' +
+        '<script>\n' +
+        '(function() {\n' +
+        '  var params = new URLSearchParams(window.location.search);\n' +
+        '  var status = params.get("reg");\n' +
+        '  if (!status) {\n' +
+        '    status = localStorage.getItem("tmi_registrations_open");\n' +
+        '  }\n' +
+        '  if (status === "closed" || status === "false") {\n' +
+        '    document.addEventListener("DOMContentLoaded", function() {\n' +
+        '      document.body.innerHTML =\n' +
+        '        \'<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;text-align:center;padding:20px">\' +\n' +
+        '        \'<div><h1 style="color:#dc2626;font-size:48px;margin-bottom:16px">Registrations Closed</h1>\' +\n' +
+        '        \'<p style="color:#6b7280;font-size:18px">Registration is currently disabled. Please check back later.</p>\' +\n' +
+        '        \'</div></div>\';\n' +
+        '    });\n' +
+        '  }\n' +
+        '})();\n' +
+        '<\/script>';
+    }
+
+    function refreshEmbedCode() {
+        var ta = document.getElementById('embedCode');
+        if (ta) ta.value = generateEmbedCode();
+        var statusLink = document.getElementById('regSiteLinkStatus');
+        if (statusLink) {
+            var isOpen = TMI.isRegOpen();
+            statusLink.href = 'https://fanciful-kringle-a1224b.netlify.app/?reg=' + (isOpen ? 'open' : 'closed');
+        }
+    }
+
+    function copyEmbed() {
+        var ta = document.getElementById('embedCode');
+        ta.select();
+        document.execCommand('copy');
+        var btn = ta.nextElementSibling;
+        btn.textContent = 'Copied!';
+        setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        updateRegUI();
+        refreshEmbedCode();
+    });
+
+    function saveGeneral() {
+        var isOpen = document.getElementById('regToggle').checked;
+        TMI.setRegStatus(isOpen);
+        updateRegUI();
+        TMI.updateRegBadge();
+        refreshEmbedCode();
+        var label = document.getElementById('regStatusLabel');
+        label.textContent = 'Saved!';
+        label.style.color = '#16a34a';
+        setTimeout(updateRegUI, 1500);
+    }
+
+    function previewAvatar(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const container = document.getElementById('avatarPreview');
+            container.innerHTML = '<img src="' + e.target.result + '" alt="Avatar">';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function removeAvatar() {
+        const container = document.getElementById('avatarPreview');
+        container.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>';
+    }
+</script>
+<script src="../assets/app.js"></script>
+</body>
+</html>
