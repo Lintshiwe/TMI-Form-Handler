@@ -74,16 +74,62 @@ export async function handler(event) {
         auth: { user: smtpUser, pass: smtpPass },
       })
 
-      await transporter.sendMail({
-        from: '"TMI Hackathon" <' + smtpUser + '>',
-        to: reg.email,
-        subject: "Your TMI Hackathon 2024 Entry Ticket",
-        html: `
+      const shortlistHtml = `
 <!DOCTYPE html>
 <html>
 <head><meta charset="UTF-8"></head>
 <body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#eef4ff" style="background-color:#eef4ff">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#eef4ff">
+    <tr>
+      <td align="center" bgcolor="#eef4ff" style="padding:40px 16px;background-color:#eef4ff">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" align="center" style="max-width:420px;margin:0 auto;background:#ffffff;border-radius:24px;border:1px solid #e2e8f0">
+          <tr>
+            <td align="center" style="padding:32px 24px 0">
+              <table role="presentation" style="width:64px;height:64px;border:1px solid #e2e8f0;border-radius:16px;margin:0 auto 12px">
+                <tr><td align="center" style="padding:4px">
+                  <img src="https://tmi-form-handler.netlify.app/assets/tmi-logo.png" alt="TMI" width="56" height="56" style="display:block;border:0">
+                </td></tr>
+              </table>
+              <p style="margin:0;font-size:26px;font-weight:900;letter-spacing:-1px">
+                <span style="color:#000">TM</span><span style="color:#2563eb">I</span><span style="color:#1e293b"> HACKATHON</span>
+              </p>
+              <p style="margin:2px 0 0;font-size:11px;font-weight:700;color:#2563eb;text-transform:uppercase;letter-spacing:2px">Shortlisted</p>
+            </td>
+          </tr>
+          <tr><td style="padding:0 24px"><hr style="border:none;border-top:1px solid #e2e8f0;margin:0"></td></tr>
+          <tr>
+            <td align="center" style="padding:24px 24px">
+              <p style="margin:0 0 12px;font-size:24px;font-weight:800;color:#1e293b">Congratulations ${name}!</p>
+              <p style="margin:0 0 16px;font-size:15px;color:#475569;line-height:1.6">
+                You have been shortlisted for the TMI Hackathon 2024.
+                Your ticket will be sent to this email within the next minute.
+              </p>
+              <table role="presentation" style="margin:0 auto">
+                <tr>
+                  <td style="padding:4px 14px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:20px;font-size:11px;font-weight:700;color:#2563eb;text-transform:uppercase;letter-spacing:1px">Team: ${team}</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr><td style="padding:0 24px"><hr style="border:none;border-top:1px solid #e2e8f0;margin:0"></td></tr>
+          <tr>
+            <td align="center" style="padding:12px 24px">
+              <p style="margin:0;font-size:10px;color:#94a3b8">TMI Hackathon 2024</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`
+
+      const ticketHtml = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#eef4ff">
     <tr>
       <td align="center" bgcolor="#eef4ff" style="padding:40px 16px;background-color:#eef4ff">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" align="center" style="max-width:420px;margin:0 auto;background:#ffffff;border-radius:24px;border:1px solid #e2e8f0">
@@ -136,8 +182,24 @@ export async function handler(event) {
     </tr>
   </table>
 </body>
-</html>`,
-        attachments: []
+</html>`
+
+      await transporter.sendMail({
+        from: '"TMI Hackathon" <' + smtpUser + '>',
+        to: reg.email,
+        subject: "You've Been Shortlisted – TMI Hackathon 2024",
+        html: shortlistHtml,
+        attachments: [],
+      })
+
+      await new Promise(resolve => setTimeout(resolve, 60000))
+
+      await transporter.sendMail({
+        from: '"TMI Hackathon" <' + smtpUser + '>',
+        to: reg.email,
+        subject: "Your TMI Hackathon 2024 Entry Ticket",
+        html: ticketHtml,
+        attachments: [],
       })
 
       await client.mutation("registrations:updateStatus", {
