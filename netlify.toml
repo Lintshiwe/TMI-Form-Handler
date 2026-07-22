@@ -21,6 +21,21 @@
   to = "/.netlify/functions/registration-status"
   status = 200
 
+[[redirects]]
+  from = "/api/approve-registration"
+  to = "/.netlify/functions/approve-registration"
+  status = 200
+
+[[redirects]]
+  from = "/api/get-ticket"
+  to = "/.netlify/functions/get-ticket"
+  status = 200
+
+[[redirects]]
+  from = "/api/check-in"
+  to = "/.netlify/functions/check-in"
+  status = 200
+
 [[headers]]
   for = "/assets/*"
   [headers.values]
