@@ -85,7 +85,7 @@ export async function handler(event) {
 <body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#eef4ff" style="background-color:#eef4ff">
     <tr>
-      <td align="center" style="padding:40px 16px">
+      <td align="center" bgcolor="#eef4ff" style="padding:40px 16px;background-color:#eef4ff">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" align="center" style="max-width:420px;margin:0 auto;background:#ffffff;border-radius:24px;border:1px solid #e2e8f0">
           <tr>
             <td align="center" style="padding:32px 24px 0">
