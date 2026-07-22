@@ -162,15 +162,7 @@ TMI.saveAccessibilitySettings = function(settings) {
 };
 
 TMI.applyAccessibilitySettings = function() {
-    if (!document.body) {
-        var retry = function() { TMI.applyAccessibilitySettings(); };
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', retry);
-        } else {
-            document.addEventListener('DOMContentLoaded', retry);
-        }
-        return;
-    }
+    if (!document.body) return;
     var settings = TMI.getAccessibilitySettings();
     if (settings.highContrast) {
         document.body.classList.add('high-contrast');
@@ -309,8 +301,16 @@ TMI.hideSkeletons = function(parentSelector) {
     TMI.fetchRegStatusAPI().then(function() {
         TMI.updateRegBadge();
     });
-    TMI.applyAccessibilitySettings();
     TMI.fetchRegistrations();
+    function boot() {
+        TMI.applyAccessibilitySettings();
+        TMI.renderProfileAvatar(document.getElementById('headerAvatar'));
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', boot);
+    } else {
+        boot();
+    }
 })();
 
 TMI.setActiveNav = function(path) {
