@@ -53,3 +53,48 @@ export const register = mutation({
     })
   },
 })
+
+export const updateStatus = mutation({
+  args: {
+    id: v.id("registrations"),
+    status: v.string(),
+    ticketId: v.optional(v.string()),
+    ticketSent: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    const patch: Record<string, any> = { status: args.status }
+    if (args.ticketId !== undefined) patch.ticketId = args.ticketId
+    if (args.ticketSent !== undefined) patch.ticketSent = args.ticketSent
+    await ctx.db.patch(args.id, patch)
+  },
+})
+
+export const getByTicketId = query({
+  args: { ticketId: v.string() },
+  handler: async (ctx, args) => {
+    const results = await ctx.db.query("registrations")
+      .withIndex("by_ticketId", q => q.eq("ticketId", args.ticketId))
+      .collect()
+    return results.length > 0 ? results[0] : null
+  },
+})
+
+export const checkIn = mutation({
+  args: { ticketId: v.string() },
+  handler: async (ctx, args) => {
+    const results = await ctx.db.query("registrations")
+      .withIndex("by_ticketId", q => q.eq("ticketId", args.ticketId))
+      .collect()
+    if (results.length === 0) throw new Error("Ticket not found")
+    const reg = results[0]
+    if (reg.status === "Checked In") {
+      await ctx.db.patch(reg._id, { scanAttempts: (reg.scanAttempts || 0) + 1 })
+      throw new Error("already_checked_in")
+    }
+    await ctx.db.patch(reg._id, {
+      status: "Checked In",
+      checkedInAt: new Date().toISOString(),
+      scanAttempts: (reg.scanAttempts || 0) + 1,
+    })
+  },
+})

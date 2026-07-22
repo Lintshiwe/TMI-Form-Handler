@@ -28,7 +28,11 @@ export default defineSchema({
     emergencyPhone: v.string(),
     createdAt: v.string(),
     status: v.string(),
-  }).index("by_status", ["status"]).index("by_createdAt", ["createdAt"]),
+    ticketId: v.optional(v.string()),
+    ticketSent: v.optional(v.boolean()),
+    checkedInAt: v.optional(v.string()),
+    scanAttempts: v.optional(v.number()),
+  }).index("by_status", ["status"]).index("by_createdAt", ["createdAt"]).index("by_ticketId", ["ticketId"]),
   settings: defineTable({
     key: v.string(),
     value: v.string(),
