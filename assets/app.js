@@ -162,6 +162,15 @@ TMI.saveAccessibilitySettings = function(settings) {
 };
 
 TMI.applyAccessibilitySettings = function() {
+    if (!document.body) {
+        var retry = function() { TMI.applyAccessibilitySettings(); };
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', retry);
+        } else {
+            document.addEventListener('DOMContentLoaded', retry);
+        }
+        return;
+    }
     var settings = TMI.getAccessibilitySettings();
     if (settings.highContrast) {
         document.body.classList.add('high-contrast');
