@@ -578,16 +578,10 @@
                                 <label class="toggle-switch" style="flex-shrink:0">
                                     <input type="checkbox">
                                     <span class="toggle-slider"></span>
-                                </label>
-                            </div>
+                                 </label>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script>
     function showSection(id) {
         document.querySelectorAll('.settings-section').forEach(s => s.classList.remove('active'));
@@ -618,10 +612,10 @@
         });
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
+    (function() {
         loadRegStatus();
         loadAccountProfile();
-    });
+    })();
 
     function saveGeneral() {
         var isOpen = document.getElementById('regToggle').checked;
@@ -744,6 +738,12 @@
         localStorage.removeItem('tmi_user_avatar');
     }
 </script>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
 <script src="../assets/app.js?v=3"></script>
 </body>
 </html>

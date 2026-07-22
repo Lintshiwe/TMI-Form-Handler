@@ -142,12 +142,7 @@
                     </tbody>
                 </table>
             </div>
-        </div>
-    </div>
-</div>
-
-<script src="assets/app.js?v=3"></script>
-<script>
+            <script>
     function showCards() {
         ['sk-card-1','sk-card-2','sk-card-3','sk-card-4'].forEach(function(id) { var el=document.getElementById(id); if(el){el.style.display='none'} });
         ['card-total','card-teams','card-provinces','card-pending'].forEach(function(id) { var el=document.getElementById(id); if(el){el.style.display=''} });
@@ -204,14 +199,19 @@
         TMI.renderProfileAvatar(document.getElementById('headerAvatar'));
     }
 
-    window.addEventListener('DOMContentLoaded', function() {
+    (function() {
         TMI.updateRegBadge();
         if (TMI.registrations.length) {
             renderDashboard();
         } else {
             TMI.fetchRegistrations().then(renderDashboard);
         }
-    });
+    })();
 </script>
+        </div>
+    </div>
+</div>
+
+<script src="assets/app.js?v=3"></script>
 </body>
 </html>

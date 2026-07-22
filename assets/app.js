@@ -302,3 +302,61 @@ TMI.hideSkeletons = function(parentSelector) {
     TMI.applyAccessibilitySettings();
     TMI.fetchRegistrations();
 })();
+
+TMI.setActiveNav = function(path) {
+    var navItems = document.querySelectorAll('.sidebar .nav-item');
+    var targetPath = path || window.location.pathname;
+    navItems.forEach(function(item) {
+        var href = item.getAttribute('href');
+        if (!href) return;
+        var linkPath = new URL(href, window.location.origin).pathname;
+        item.classList.toggle('active', linkPath === targetPath);
+    });
+};
+
+TMI.loadPage = function(path) {
+    return fetch(path)
+        .then(function(r) { return r.text(); })
+        .then(function(html) {
+            var parser = new DOMParser();
+            var doc = parser.parseFromString(html, 'text/html');
+            var newContent = doc.getElementById('page-content');
+            var newTitle = doc.querySelector('title');
+            var currentContent = document.getElementById('page-content');
+            if (!newContent || !currentContent) return;
+            if (newTitle) document.title = newTitle.textContent;
+            currentContent.innerHTML = newContent.innerHTML;
+            currentContent.querySelectorAll('script').forEach(function(oldScript) {
+                var newScript = document.createElement('script');
+                if (oldScript.src) {
+                    newScript.src = oldScript.src;
+                } else {
+                    newScript.textContent = oldScript.textContent;
+                }
+                oldScript.parentNode.replaceChild(newScript, oldScript);
+            });
+            TMI.setActiveNav(path);
+            TMI.updateRegBadge();
+        });
+};
+
+TMI.navigate = function(path, skipHistory) {
+    if (!skipHistory) {
+        history.pushState({ path: path }, '', path);
+    }
+    TMI.loadPage(path);
+};
+
+document.addEventListener('click', function(e) {
+    var link = e.target.closest('.sidebar a');
+    if (link && link.getAttribute('href')) {
+        e.preventDefault();
+        TMI.navigate(link.getAttribute('href'));
+    }
+});
+
+window.addEventListener('popstate', function(e) {
+    if (e.state && e.state.path) {
+        TMI.loadPage(e.state.path);
+    }
+});
