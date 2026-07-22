@@ -337,7 +337,8 @@
                             document.getElementById('checkedInMsg').style.display = 'none';
                         }
 
-                        var qrText = JSON.stringify({ ticketId: d.ticketId, name: d.firstName + ' ' + d.lastName, event: 'TMI Hackathon 2024' });
+                        var sig = d.sig || '';
+                        var qrText = JSON.stringify({ ticketId: d.ticketId, name: d.firstName + ' ' + d.lastName, sig: sig, event: 'TMI Hackathon 2024' });
                         generateQR(qrText);
                     })
                     .catch(function(err) {

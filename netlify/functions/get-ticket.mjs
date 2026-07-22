@@ -1,4 +1,5 @@
 import { ConvexHttpClient } from "convex/browser"
+import crypto from "crypto"
 
 export async function handler(event) {
   const headers = {
@@ -21,6 +22,8 @@ export async function handler(event) {
     const reg = await client.query("registrations:getByTicketId", { ticketId })
     if (!reg) return { statusCode: 404, headers, body: JSON.stringify({ success: false, error: "Ticket not found" }) }
 
+    const ticketSecret = process.env.TICKET_SECRET
+
     function maskEmail(email) {
       if (!email || !email.includes('@')) return email;
       var parts = email.split('@');
@@ -28,6 +31,8 @@ export async function handler(event) {
       var masked = name.length <= 2 ? name[0] + '***' : name.slice(0, 2) + '***' + name.slice(-1);
       return masked + '@' + parts[1];
     }
+
+    var sig = ticketSecret ? crypto.createHmac("sha256", ticketSecret).update(ticketId).digest("hex") : '';
 
     return {
       statusCode: 200,
@@ -45,6 +50,7 @@ export async function handler(event) {
           ticketSent: reg.ticketSent,
           checkedInAt: reg.checkedInAt,
           scanAttempts: reg.scanAttempts || 0,
+          sig: sig,
         },
       }),
     }
