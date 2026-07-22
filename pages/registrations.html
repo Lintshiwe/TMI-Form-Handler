@@ -253,7 +253,15 @@
             </div>
 
             <div class="table-container">
-                <table>
+                <div id="sk-table" class="skeleton">
+                    <div class="sk-row"><span class="sk sk-cell"></span><span class="sk sk-cell"></span><span class="sk sk-cell"></span><span class="sk sk-cell-sm"></span><span class="sk sk-cell-sm"></span><span class="sk sk-badge"></span></div>
+                    <div class="sk-row"><span class="sk sk-cell"></span><span class="sk sk-cell"></span><span class="sk sk-cell"></span><span class="sk sk-cell-sm"></span><span class="sk sk-cell-sm"></span><span class="sk sk-badge"></span></div>
+                    <div class="sk-row"><span class="sk sk-cell"></span><span class="sk sk-cell"></span><span class="sk sk-cell"></span><span class="sk sk-cell-sm"></span><span class="sk sk-cell-sm"></span><span class="sk sk-badge"></span></div>
+                    <div class="sk-row"><span class="sk sk-cell"></span><span class="sk sk-cell"></span><span class="sk sk-cell"></span><span class="sk sk-cell-sm"></span><span class="sk sk-cell-sm"></span><span class="sk sk-badge"></span></div>
+                    <div class="sk-row"><span class="sk sk-cell"></span><span class="sk sk-cell"></span><span class="sk sk-cell"></span><span class="sk sk-cell-sm"></span><span class="sk sk-cell-sm"></span><span class="sk sk-badge"></span></div>
+                    <div class="sk-row"><span class="sk sk-cell"></span><span class="sk sk-cell"></span><span class="sk sk-cell"></span><span class="sk sk-cell-sm"></span><span class="sk sk-cell-sm"></span><span class="sk sk-badge"></span></div>
+                </div>
+                <table id="data-table" style="display:none">
                     <thead>
                         <tr>
                             <th style="width:50px;"><input type="checkbox" class="row-checkbox" id="selectAll" onclick="toggleSelectAll()"></th>
@@ -303,6 +311,8 @@
     }
 
     function renderTable() {
+        TMI.hideSkeletons();
+        var dt=document.getElementById('data-table'); if(dt) dt.style.display='';
         var start = (currentPage - 1) * perPage;
         var end = start + perPage;
         var pageData = filteredData.slice(start, end);

@@ -16,6 +16,11 @@
   to = "/.netlify/functions/store-registration"
   status = 200
 
+[[redirects]]
+  from = "/api/registration-status"
+  to = "/.netlify/functions/registration-status"
+  status = 200
+
 [[headers]]
   for = "/assets/*"
   [headers.values]

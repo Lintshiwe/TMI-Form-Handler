@@ -81,7 +81,21 @@
         </nav>
 
         <div class="content-area">
-            <div class="metrics-grid">
+            <div class="metrics-grid skeleton" id="sk-metrics">
+                <div class="metric-card active"><div class="sk sk-card"></div></div>
+                <div class="metric-card"><div class="sk sk-card"></div></div>
+                <div class="metric-card"><div class="sk sk-card"></div></div>
+                <div class="metric-card"><div class="sk sk-card"></div></div>
+            </div>
+            <div class="skeleton" id="sk-charts">
+                <div class="charts-row">
+                    <div class="chart-container"><div class="sk sk-chart"></div></div>
+                    <div class="chart-container"><div class="sk sk-chart"></div></div>
+                </div>
+                <div><div class="sk sk-chart"></div></div>
+            </div>
+
+            <div class="metrics-grid" id="real-metrics" style="display:none">
                 <div class="metric-card active">
                     <div class="metric-label">Total Registrations</div>
                     <div class="metric-value" id="totalRegMetric">-</div>
@@ -104,7 +118,7 @@
                 </div>
             </div>
 
-            <div class="charts-row">
+            <div class="charts-row" id="real-charts" style="display:none">
                 <div class="chart-container">
                     <div class="chart-title">Registration Trends Over Time</div>
                     <canvas id="lineChart"></canvas>
@@ -115,7 +129,7 @@
                 </div>
             </div>
 
-            <div class="full-width-chart">
+            <div class="full-width-chart" id="real-bar" style="display:none">
                 <div class="chart-title">Registrations by Province</div>
                 <canvas id="barChart"></canvas>
             </div>
@@ -150,7 +164,13 @@
         return '<span class="' + (pct >= 0 ? 'trend-up' : 'trend-down') + '">' + (pct >= 0 ? '↑' : '↓') + ' ' + Math.abs(pct) + '% vs prior period</span>';
     }
 
+    function showAnalytics() {
+        TMI.hideSkeletons();
+        ['real-metrics','real-charts','real-bar'].forEach(function(id){var el=document.getElementById(id);if(el)el.style.display=''});
+    }
+
     function buildCharts(range) {
+        showAnalytics();
         var data = getFilteredData(range);
 
         var total = data.length;

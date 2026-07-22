@@ -2,6 +2,7 @@ var TMI = TMI || {};
 
 TMI.regStatusKey = 'tmi_registrations_open';
 TMI.registrations = [];
+TMI._regStatusLoaded = false;
 
 TMI.roleBadgeConfig = {
     'organizer': { label: 'Organizer', color: '#8b5cf6', bg: '#f5f3ff' },
@@ -20,6 +21,33 @@ TMI.setRegStatus = function(open) {
 
 TMI.isRegOpen = function() {
     return TMI.getRegStatus();
+};
+
+TMI.fetchRegStatusAPI = function() {
+    return fetch('/api/registration-status')
+        .then(function(r) { return r.json(); })
+        .then(function(resp) {
+            if (resp.success) {
+                TMI.setRegStatus(resp.open);
+                TMI._regStatusLoaded = true;
+            }
+            return resp.open;
+        })
+        .catch(function() {
+            TMI._regStatusLoaded = true;
+            return TMI.getRegStatus();
+        });
+};
+
+TMI.setRegStatusAPI = function(open) {
+    TMI.setRegStatus(open);
+    return fetch('/api/registration-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ open: open }),
+    }).then(function(r) { return r.json(); }).catch(function() {
+        return { success: false };
+    });
 };
 
 TMI.updateRegBadge = function() {
@@ -203,8 +231,47 @@ TMI.getStatusBadge = function(r) {
     return '<span class="status-badge ' + cls + '">' + status + '</span>';
 };
 
+TMI.injectSkeletonStyles = function() {
+    if (document.getElementById('tmi-skeleton-styles')) return;
+    var style = document.createElement('style');
+    style.id = 'tmi-skeleton-styles';
+    style.textContent =
+        '.sk{background:linear-gradient(90deg,#e5e7eb 25%,#f3f4f6 50%,#e5e7eb 75%);background-size:200% 100%;animation:sk-shimmer 1.5s infinite;border-radius:6px}' +
+        '@keyframes sk-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}' +
+        '.sk-row{display:flex;gap:12px;padding:14px 16px;align-items:center}' +
+        '.sk-cell{height:16px;flex:1}' +
+        '.sk-cell-sm{height:16px;width:80px;flex:none}' +
+        '.sk-circle{width:40px;height:40px;border-radius:50%;flex:none}' +
+        '.sk-card{height:100px;border-radius:14px}' +
+        '.sk-chart{height:300px;border-radius:14px;margin-bottom:20px}' +
+        '.sk-badge{height:32px;width:160px;border-radius:9999px;flex:none}' +
+        '.skeleton{opacity:1;transition:opacity .3s}' +
+        '.skeleton-hidden{display:none}';
+    document.head.appendChild(style);
+};
+
+TMI.showSkeletons = function(parentSelector) {
+    TMI.injectSkeletonStyles();
+    var parent = parentSelector ? document.querySelector(parentSelector) : document;
+    if (!parent) return;
+    parent.querySelectorAll('.skeleton').forEach(function(el) {
+        el.classList.remove('skeleton-hidden');
+    });
+};
+
+TMI.hideSkeletons = function(parentSelector) {
+    var parent = parentSelector ? document.querySelector(parentSelector) : document;
+    if (!parent) return;
+    parent.querySelectorAll('.skeleton').forEach(function(el) {
+        el.classList.add('skeleton-hidden');
+    });
+};
+
 (function() {
-    TMI.updateRegBadge();
+    TMI.injectSkeletonStyles();
+    TMI.fetchRegStatusAPI().then(function() {
+        TMI.updateRegBadge();
+    });
     TMI.applyAccessibilitySettings();
     TMI.fetchRegistrations();
 })();

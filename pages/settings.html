@@ -315,6 +315,11 @@
                 </nav>
 
                 <div class="settings-content">
+                    <div class="skeleton" id="sk-settings">
+                        <div class="sk-row"><span class="sk sk-circle"></span><span class="sk sk-cell"></span></div>
+                        <div class="sk-row"><span class="sk sk-cell"></span><span class="sk sk-cell-sm"></span></div>
+                        <div class="sk-row"><span class="sk sk-cell"></span><span class="sk sk-cell-sm"></span></div>
+                    </div>
                     <div id="section-general" class="settings-section active">
                         <h2>General</h2>
                         <p class="subtitle">Manage your event configuration</p>
@@ -494,9 +499,9 @@
     }
 
     function updateRegUI() {
-        const isOpen = TMI.isRegOpen();
-        const toggle = document.getElementById('regToggle');
-        const label = document.getElementById('regStatusLabel');
+        var isOpen = TMI.isRegOpen();
+        var toggle = document.getElementById('regToggle');
+        var label = document.getElementById('regStatusLabel');
         if (toggle) toggle.checked = isOpen;
         if (label) {
             label.textContent = isOpen ? 'Registrations Open' : 'Registrations Closed';
@@ -504,25 +509,55 @@
         }
     }
 
+    function loadRegStatus() {
+        TMI.fetchRegStatusAPI().then(function() {
+            updateRegUI();
+            refreshEmbedCode();
+            TMI.updateRegBadge();
+            TMI.hideSkeletons();
+            document.getElementById('section-general').style.display = '';
+        });
+    }
+
     function generateEmbedCode() {
         var siteUrl = window.location.origin;
         return '<!-- Add this inside <head> on your registration site -->\n' +
         '<script>\n' +
         '(function() {\n' +
-        '  var params = new URLSearchParams(window.location.search);\n' +
-        '  var status = params.get("reg");\n' +
-        '  if (!status) {\n' +
-        '    status = localStorage.getItem("tmi_registrations_open");\n' +
+        '  var checkStatus = function() {\n' +
+        '    var params = new URLSearchParams(window.location.search);\n' +
+        '    var status = params.get("reg");\n' +
+        '    if (status === "open" || status === "closed") {\n' +
+        '      applyStatus(status === "open");\n' +
+        '      return;\n' +
+        '    }\n' +
+        '    var xhr = new XMLHttpRequest();\n' +
+        '    xhr.open("GET", "' + siteUrl + '/api/registration-status", true);\n' +
+        '    xhr.onload = function() {\n' +
+        '      try {\n' +
+        '        var resp = JSON.parse(xhr.responseText);\n' +
+        '        applyStatus(resp.open !== false);\n' +
+        '      } catch(e) { applyStatus(true); }\n' +
+        '    };\n' +
+        '    xhr.onerror = function() { applyStatus(true); };\n' +
+        '    xhr.send();\n' +
+        '  };\n' +
+        '  var applied = false;\n' +
+        '  function applyStatus(isOpen) {\n' +
+        '    if (applied) return; applied = true;\n' +
+        '    if (!isOpen) {\n' +
+        '      document.addEventListener("DOMContentLoaded", function() {\n' +
+        '        document.body.innerHTML =\n' +
+        '          \'<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;text-align:center;padding:20px">\' +\n' +
+        '          \'<div><h1 style="color:#dc2626;font-size:48px;margin-bottom:16px">Registrations Closed</h1>\' +\n' +
+        '          \'<p style="color:#6b7280;font-size:18px">Registration is currently disabled. Please check back later.</p>\' +\n' +
+        '          \'</div></div>\';\n' +
+        '      });\n' +
+        '    }\n' +
         '  }\n' +
-        '  if (status === "closed" || status === "false") {\n' +
-        '    document.addEventListener("DOMContentLoaded", function() {\n' +
-        '      document.body.innerHTML =\n' +
-        '        \'<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;text-align:center;padding:20px">\' +\n' +
-        '        \'<div><h1 style="color:#dc2626;font-size:48px;margin-bottom:16px">Registrations Closed</h1>\' +\n' +
-        '        \'<p style="color:#6b7280;font-size:18px">Registration is currently disabled. Please check back later.</p>\' +\n' +
-        '        \'</div></div>\';\n' +
-        '    });\n' +
-        '  }\n' +
+        '  if (document.readyState === "loading") {\n' +
+        '    document.addEventListener("DOMContentLoaded", checkStatus);\n' +
+        '  } else { checkStatus(); }\n' +
         '})();\n' +
         '<\/script>';
     }
@@ -547,20 +582,29 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        updateRegUI();
-        refreshEmbedCode();
+        loadRegStatus();
     });
 
     function saveGeneral() {
         var isOpen = document.getElementById('regToggle').checked;
-        TMI.setRegStatus(isOpen);
-        updateRegUI();
-        TMI.updateRegBadge();
-        refreshEmbedCode();
-        var label = document.getElementById('regStatusLabel');
-        label.textContent = 'Saved!';
-        label.style.color = '#16a34a';
-        setTimeout(updateRegUI, 1500);
+        var btn = document.querySelector('.save-btn');
+        btn.textContent = 'Saving...';
+        btn.disabled = true;
+        TMI.setRegStatusAPI(isOpen).then(function(resp) {
+            TMI.updateRegBadge();
+            refreshEmbedCode();
+            var label = document.getElementById('regStatusLabel');
+            if (resp && resp.success) {
+                label.textContent = 'Synced to registration site!';
+                label.style.color = '#16a34a';
+            } else {
+                label.textContent = 'Saved locally (API sync failed)';
+                label.style.color = '#f59e0b';
+            }
+            btn.textContent = 'Save';
+            btn.disabled = false;
+            setTimeout(updateRegUI, 2000);
+        });
     }
 
     function previewAvatar(event) {

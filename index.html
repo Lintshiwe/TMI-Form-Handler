@@ -56,19 +56,32 @@
     </div>
 
     <div class="summary-cards">
-        <div class="card active">
+        <div class="card active skeleton" id="sk-card-1">
+            <div class="sk sk-card"></div>
+        </div>
+        <div class="card skeleton" id="sk-card-2">
+            <div class="sk sk-card"></div>
+        </div>
+        <div class="card skeleton" id="sk-card-3">
+            <div class="sk sk-card"></div>
+        </div>
+        <div class="card skeleton" id="sk-card-4">
+            <div class="sk sk-card"></div>
+        </div>
+
+        <div class="card active" id="card-total" style="display:none">
             <div class="card-label">Total Registrations</div>
             <div class="card-value" id="totalReg">0</div>
         </div>
-        <div class="card">
+        <div class="card" id="card-teams" style="display:none">
             <div class="card-label">Teams Registered</div>
             <div class="card-value" id="teamsReg">0</div>
         </div>
-        <div class="card">
+        <div class="card" id="card-provinces" style="display:none">
             <div class="card-label">Provinces Reached</div>
             <div class="card-value" id="provincesReached">0</div>
         </div>
-        <div class="card">
+        <div class="card" id="card-pending" style="display:none">
             <div class="card-label">Pending Approvals</div>
             <div class="card-value">&nbsp;</div>
             <div class="pending-badge" id="pendingBadge">0</div>
@@ -102,7 +115,15 @@
             </div>
 
             <div class="table-container">
-                <table>
+                <div id="sk-table" class="skeleton">
+                    <div class="sk-row"><span class="sk sk-cell"></span><span class="sk sk-cell"></span><span class="sk sk-cell"></span><span class="sk sk-cell-sm"></span><span class="sk sk-cell-sm"></span></div>
+                    <div class="sk-row"><span class="sk sk-cell"></span><span class="sk sk-cell"></span><span class="sk sk-cell"></span><span class="sk sk-cell-sm"></span><span class="sk sk-cell-sm"></span></div>
+                    <div class="sk-row"><span class="sk sk-cell"></span><span class="sk sk-cell"></span><span class="sk sk-cell"></span><span class="sk sk-cell-sm"></span><span class="sk sk-cell-sm"></span></div>
+                    <div class="sk-row"><span class="sk sk-cell"></span><span class="sk sk-cell"></span><span class="sk sk-cell"></span><span class="sk sk-cell-sm"></span><span class="sk sk-cell-sm"></span></div>
+                    <div class="sk-row"><span class="sk sk-cell"></span><span class="sk sk-cell"></span><span class="sk sk-cell"></span><span class="sk sk-cell-sm"></span><span class="sk sk-cell-sm"></span></div>
+                    <div class="sk-row"><span class="sk sk-cell"></span><span class="sk sk-cell"></span><span class="sk sk-cell"></span><span class="sk sk-cell-sm"></span><span class="sk sk-cell-sm"></span></div>
+                </div>
+                <table id="data-table" style="display:none">
                     <thead>
                         <tr>
                             <th>Name</th><th>Email</th><th>Track/Category</th>
@@ -120,7 +141,15 @@
 
 <script src="assets/app.js"></script>
 <script>
+    function showCards() {
+        ['sk-card-1','sk-card-2','sk-card-3','sk-card-4'].forEach(function(id) { var el=document.getElementById(id); if(el){el.style.display='none'} });
+        ['card-total','card-teams','card-provinces','card-pending'].forEach(function(id) { var el=document.getElementById(id); if(el){el.style.display=''} });
+    }
+
     function renderDashboard() {
+        showCards();
+        TMI.hideSkeletons();
+        var dt=document.getElementById('data-table'); if(dt) dt.style.display='';
         var rows = TMI.registrations;
 
         var total = rows.length;
