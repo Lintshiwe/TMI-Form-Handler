@@ -54,8 +54,7 @@ export async function handler(event) {
       })
     }
 
-    const qrPayload = JSON.stringify({ ticketId, name: reg.firstName + " " + reg.lastName, sig })
-    const qrDataUri = await QRCode.toDataURL(qrPayload, { width: 300, margin: 2, color: { dark: "#2563eb", light: "#ffffff" } })
+    const qrDataUri = await QRCode.toDataURL(ticketId, { width: 300, margin: 2, color: { dark: "#2563eb", light: "#ffffff" } })
 
     const smtpHost = process.env.SMTP_HOST
     const smtpPort = parseInt(process.env.SMTP_PORT || "587")
