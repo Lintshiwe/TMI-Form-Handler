@@ -37,6 +37,16 @@
   status = 200
 
 [[redirects]]
+  from = "/api/projects"
+  to = "/.netlify/functions/projects"
+  status = 200
+
+[[redirects]]
+  from = "/api/scores"
+  to = "/.netlify/functions/scores"
+  status = 200
+
+[[redirects]]
   from = "/participant-ticket.html"
   to = "/"
   status = 404

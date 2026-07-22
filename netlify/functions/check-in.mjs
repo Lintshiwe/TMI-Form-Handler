@@ -39,6 +39,9 @@ export async function handler(event) {
             success: false,
             error: "already_checked_in",
             message: "This ticket has already been used.",
+            name: (reg?.firstName || "") + " " + (reg?.lastName || ""),
+            teamName: reg?.teamName || "",
+            checkedInAt: reg?.checkedInAt || "",
             scanAttempts: reg?.scanAttempts || 0,
           }),
         }

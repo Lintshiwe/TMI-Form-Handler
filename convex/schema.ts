@@ -37,4 +37,22 @@ export default defineSchema({
     key: v.string(),
     value: v.string(),
   }).index("by_key", ["key"]),
+  projects: defineTable({
+    registrationId: v.id("registrations"),
+    projectName: v.string(),
+    description: v.string(),
+    hackathonTrack: v.string(),
+    teamName: v.string(),
+    submittedAt: v.string(),
+  }).index("by_registrationId", ["registrationId"]),
+  scores: defineTable({
+    projectId: v.id("projects"),
+    judgeName: v.string(),
+    innovation: v.number(),
+    technical: v.number(),
+    impact: v.number(),
+    presentation: v.number(),
+    total: v.number(),
+    submittedAt: v.string(),
+  }).index("by_projectId", ["projectId"]),
 })
