@@ -292,13 +292,13 @@
         <div class="content-area">
             <div class="settings-layout">
                 <nav class="settings-sidebar">
-                    <button class="settings-sidebar-item active" onclick="showSection('general')">
-                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
-                        General
-                    </button>
-                    <button class="settings-sidebar-item" onclick="showSection('account')">
+                    <button class="settings-sidebar-item active" onclick="showSection('account')">
                         <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
                         Account
+                    </button>
+                    <button class="settings-sidebar-item" onclick="showSection('general')">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+                        General
                     </button>
                     <button class="settings-sidebar-item" onclick="showSection('accessibility')">
                         <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
@@ -320,7 +320,55 @@
                         <div class="sk-row"><span class="sk sk-cell"></span><span class="sk sk-cell-sm"></span></div>
                         <div class="sk-row"><span class="sk sk-cell"></span><span class="sk sk-cell-sm"></span></div>
                     </div>
-                    <div id="section-general" class="settings-section active">
+                    <div id="section-account" class="settings-section active">
+                        <h2>Account</h2>
+                        <p class="subtitle">Manage your profile information</p>
+
+                        <div class="profile-header">
+                            <div class="profile-avatar" id="avatarPreview">
+                                <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                            </div>
+                            <div class="profile-info">
+                                <h3>Admin User</h3>
+                                <p>admin@example.com</p>
+                                <div style="display:flex;gap:8px">
+                                    <label class="upload-btn">
+                                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg>
+                                        Upload photo
+                                        <input type="file" accept="image/*" style="display:none" onchange="previewAvatar(event)">
+                                    </label>
+                                    <button class="remove-btn" onclick="removeAvatar()">
+                                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                                        Remove
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="displayName">Display Name</label>
+                            <input type="text" id="displayName" value="Admin User">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" value="admin@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" id="phone" placeholder="+1 (555) 000-0000">
+                        </div>
+                        <div class="form-group">
+                            <label for="bio">Bio</label>
+                            <input type="text" id="bio" placeholder="Tell us about yourself" style="max-width:480px">
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Change Password</label>
+                            <input type="password" id="password" placeholder="Enter new password">
+                        </div>
+                        <button class="save-btn" onclick="alert('Account settings saved!')">Save</button>
+                    </div>
+
+                    <div id="section-general" class="settings-section">
                         <h2>General</h2>
                         <p class="subtitle">Manage your event configuration</p>
                         <div class="form-group">
@@ -381,54 +429,6 @@
                                 </a>
                             </div>
                         </div>
-                    </div>
-
-                    <div id="section-account" class="settings-section">
-                        <h2>Account</h2>
-                        <p class="subtitle">Manage your profile information</p>
-
-                        <div class="profile-header">
-                            <div class="profile-avatar" id="avatarPreview">
-                                <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-                            </div>
-                            <div class="profile-info">
-                                <h3>Admin User</h3>
-                                <p>admin@example.com</p>
-                                <div style="display:flex;gap:8px">
-                                    <label class="upload-btn">
-                                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg>
-                                        Upload photo
-                                        <input type="file" accept="image/*" style="display:none" onchange="previewAvatar(event)">
-                                    </label>
-                                    <button class="remove-btn" onclick="removeAvatar()">
-                                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-                                        Remove
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="displayName">Display Name</label>
-                            <input type="text" id="displayName" value="Admin User">
-                        </div>
-                        <div class="form-group">
-                            <label for="email">Email Address</label>
-                            <input type="email" id="email" value="admin@example.com">
-                        </div>
-                        <div class="form-group">
-                            <label for="phone">Phone Number</label>
-                            <input type="tel" id="phone" placeholder="+1 (555) 000-0000">
-                        </div>
-                        <div class="form-group">
-                            <label for="bio">Bio</label>
-                            <input type="text" id="bio" placeholder="Tell us about yourself" style="max-width:480px">
-                        </div>
-                        <div class="form-group">
-                            <label for="password">Change Password</label>
-                            <input type="password" id="password" placeholder="Enter new password">
-                        </div>
-                        <button class="save-btn" onclick="alert('Account settings saved!')">Save</button>
                     </div>
 
                     <div id="section-accessibility" class="settings-section">
@@ -518,11 +518,9 @@
             refreshEmbedCode();
             TMI.updateRegBadge();
             TMI.hideSkeletons();
-            document.getElementById('section-general').style.display = '';
         }).catch(function() {
             updateRegUI();
             TMI.hideSkeletons();
-            document.getElementById('section-general').style.display = '';
         });
     }
 
