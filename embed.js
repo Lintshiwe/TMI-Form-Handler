@@ -3,6 +3,11 @@
   var baseUrl = scriptSrc.replace(/\/embed\.js.*$/, '') || window.location.origin;
   var apiUrl = baseUrl + '/api/registration-status';
 
+  var hideCss = document.createElement('style');
+  hideCss.id = 'tmi-embed-hide';
+  hideCss.textContent = 'body{visibility:hidden !important}';
+  document.head.appendChild(hideCss);
+
   var styles =
     'body{margin:0;height:100vh;display:flex;align-items:center;justify-content:center;background:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;overflow:hidden}' +
     '.rc-container{text-align:center;display:flex;flex-direction:column;align-items:center;gap:24px;padding:20px}' +
@@ -26,7 +31,13 @@
     '<div class="rc-badge">STATUS: FINALIZED</div>' +
     '</div>';
 
+  function reveal() {
+    var h = document.getElementById('tmi-embed-hide');
+    if (h) h.remove();
+  }
+
   function showClosed() {
+    reveal();
     var s = document.createElement('style');
     s.textContent = styles;
     document.head.appendChild(s);
@@ -37,6 +48,7 @@
     var p = new URLSearchParams(window.location.search);
     if (p.has('reg')) {
       if (p.get('reg') !== 'open') showClosed();
+      else reveal();
       return;
     }
     var x = new XMLHttpRequest();
@@ -45,9 +57,10 @@
       try {
         var r = JSON.parse(x.responseText);
         if (r.open === false) showClosed();
-      } catch (e) { /* assume open */ }
+        else reveal();
+      } catch (e) { reveal(); }
     };
-    x.onerror = function () { /* assume open */ };
+    x.onerror = function () { reveal(); };
     x.send();
   }
 
