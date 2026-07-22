@@ -197,9 +197,11 @@
             }).join('');
         }
 
+        TMI.renderProfileAvatar(document.getElementById('headerAvatar'));
     }
 
     (function() {
+        TMI.updateRegBadge();
         if (TMI.registrations.length) {
             renderDashboard();
         } else {

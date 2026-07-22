@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TMI Hackathon - Participant Ticket</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        :root {
+            --tmi-blue: #2563eb;
+            --tmi-dark: #0f172a;
+            --bg-color: #f8fafc;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-color);
+            color: var(--tmi-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        /* Controls Section */
+        .controls {
+            background: white;
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 40px;
+            z-index: 10;
+        }
+
+        .input-group { margin-bottom: 16px; }
+        .input-group label { 
+            display: block; font-size: 13px; font-weight: 600; 
+            color: #64748b; margin-bottom: 6px; 
+            text-transform: uppercase; letter-spacing: 0.5px; 
+        }
+        .input-group input {
+            width: 100%; padding: 12px 16px; 
+            border: 1px solid #e2e8f0; border-radius: 10px;
+            font-size: 15px; outline: none; transition: border-color 0.2s;
+        }
+        .input-group input:focus { border-color: var(--tmi-blue); }
+
+        .btn-row { display: flex; gap: 12px; margin-top: 20px; }
+        .btn {
+            flex: 1; padding: 14px; border: none; 
+            border-radius: 10px; font-size: 15px; 
+            font-weight: 600; cursor: pointer; transition: all 0.2s;
+        }
+        .btn-primary { background: var(--tmi-blue); color: white; }
+        .btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); }
+        .btn-secondary { background: #f1f5f9; color: var(--tmi-dark); }
+        .btn-secondary:hover { background: #e2e8f0; }
+
+        /* Ticket Container */
+        .ticket-wrapper {
+            position: relative;
+            width: 400px;
+            height: 600px;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+            background-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiAgICAgd2lkdGg9IjEyMDAiIGhlaWdodD0iMTIwMCIKICAgICB2aWV3Qm94PSIwIDAgMTIwMCAxMjAwIgogICAgIHJvbGU9ImltZyIKICAgICBhcmlhLWxhYmVsbGVkYnk9InRpdGxlIGRlc2MiPgogIDx0aXRsZSBpZD0idGl0bGUiPlRNSSBDb2RlIExvZ288L3RpdGxlPgogIDxkZXNjIGlkPSJkZXNjIj5FZGl0YWJsZSB2ZWN0b3IgVE1JIGxvZ28gd2l0aCBwcm9ncmFtbWluZyBjb2RlIGRldGFpbHMuPC9kZXNjPgoKICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iYmx1ZUJhciIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjMTQ3M2ZmIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iIzAwNDdmZiIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KCiAgICA8Y2xpcFBhdGggaWQ9ImNsaXBUIj4KICAgICAgPHBhdGggZD0iTTY1IDMyMEg0NzBMNDI1IDM5MEgzMTVWODc1SDE5MFYzOTBINjVaIi8+CiAgICA8L2NsaXBQYXRoPgoKICAgIDxjbGlwUGF0aCBpZD0iY2xpcE0iPgogICAgICA8cGF0aCBkPSJNNDkwIDMyMEg1OTVMNzUwIDUzMEw5MDUgMzIwSDEwMTBWODc1SDkwMFY1MDBMNzUwIDcwMEw2MDAgNTAwVjg3NUg0OTBaIi8+CiAgICA8L2NsaXBQYXRoPgoKICAgIDxzdHlsZT4KICAgICAgLmNvZGUgewogICAgICAgIGZvbnQtZmFtaWx5OiAiRGVqYVZ1IFNhbnMgTW9ubyIsICJDb3VyaWVyIE5ldyIsIG1vbm9zcGFjZTsKICAgICAgICBmb250LXNpemU6IDE3cHg7CiAgICAgICAgZmlsbDogI2Q5ZWNmZjsKICAgICAgfQogICAgICAuY29kZS1ibHVlIHsKICAgICAgICBmb250LWZhbWlseTogIkRlamFWdSBTYW5zIE1vbm8iLCAiQ291cmllciBOZXciLCBtb25vc3BhY2U7CiAgICAgICAgZm9udC1zaXplOiAxN3B4OwogICAgICAgIGZpbGw6ICMyNTkwZmY7CiAgICAgIH0KICAgICAgLnNtYWxsIHsKICAgICAgICBmb250LXNpemU6IDE0cHg7CiAgICAgIH0KICAgICAgLmxpbmUgewogICAgICAgIHN0cm9rZTogIzI1OGRmZjsKICAgICAgICBzdHJva2Utd2lkdGg6IDM7CiAgICAgICAgb3BhY2l0eTogLjc7CiAgICAgIH0KICAgICAgLmRvdCB7CiAgICAgICAgZmlsbDogIzI1OGRmZjsKICAgICAgICBvcGFjaXR5OiAuNzsKICAgICAgfQogICAgPC9zdHlsZT4KICA8L2RlZnM+CgogIDxyZWN0IHdpZHRoPSIxMjAwIiBoZWlnaHQ9IjEyMDAiIGZpbGw9IiNmZmZmZmYiLz4KCiAgPCEtLSBNYWluIGxldHRlciBzaGFwZXMgLS0+CiAgPHBhdGggZD0iTTY1IDMyMEg0NzBMNDI1IDM5MEgzMTVWODc1SDE5MFYzOTBINjVaIiBmaWxsPSIjMTAyODNmIi8+CiAgPHBhdGggZD0iTTQ5MCAzMjBINTk1TDc1MCA1MzBMOTA1IDMyMEgxMDEwVjg3NUg5MDBWNTAwTDc1MCA3MDBMNjAwIDUwMFY4NzVINDkwWiIgZmlsbD0iIzEwMjgzZiIvPgogIDxyZWN0IHg9IjEwNDUiIHk9IjMyMCIgd2lkdGg9Ijk1IiBoZWlnaHQ9IjU1NSIgcng9IjIiIGZpbGw9InVybCgjYmx1ZUJhcikiLz4KCiAgPCEtLSBDb2RlIGluc2lkZSBUIC0tPgogIDxnIGNsaXAtcGF0aD0idXJsKCNjbGlwVCkiPgogICAgPHRleHQgeD0iODIiIHk9IjM1MCIgY2xhc3M9ImNvZGUtYmx1ZSI+MDE8L3RleHQ+CiAgICA8dGV4dCB4PSIxMjAiIHk9IjM1MCIgY2xhc3M9ImNvZGUiPmNvbnN0IHRoaW5rID0gKG1pbmQpID0mZ3Q7ICYjMTIzOzwvdGV4dD4KCiAgICA8dGV4dCB4PSI4MiIgeT0iMzgwIiBjbGFzcz0iY29kZS1ibHVlIj4wMjwvdGV4dD4KICAgIDx0ZXh0IHg9IjEyMCIgeT0iMzgwIiBjbGFzcz0iY29kZSI+bGV0IGluc2lnaHQgPSB0cnVlOzwvdGV4dD4KCiAgICA8dGV4dCB4PSI4MiIgeT0iNDEwIiBjbGFzcz0iY29kZS1ibHVlIj4wMzwvdGV4dD4KICAgIDx0ZXh0IHg9IjEyMCIgeT0iNDEwIiBjbGFzcz0iY29kZSI+d2hpbGUgKGN1cmlvdXMpICYjMTIzOzwvdGV4dD4KCiAgICA8dGV4dCB4PSI4MiIgeT0iNDQwIiBjbGFzcz0iY29kZS1ibHVlIj4wNDwvdGV4dD4KICAgIDx0ZXh0IHg9IjE1MCIgeT0iNDQwIiBjbGFzcz0iY29kZSI+bGVhcm4oKTs8L3RleHQ+CgogICAgPHRleHQgeD0iODIiIHk9IjQ3MCIgY2xhc3M9ImNvZGUtYmx1ZSI+MDU8L3RleHQ+CiAgICA8dGV4dCB4PSIxNTAiIHk9IjQ3MCIgY2xhc3M9ImNvZGUiPmltcHJvdmUoKTs8L3RleHQ+CgogICAgPHRleHQgeD0iODIiIHk9IjUwMCIgY2xhc3M9ImNvZGUtYmx1ZSI+MDY8L3RleHQ+CiAgICA8dGV4dCB4PSIxMjAiIHk9IjUwMCIgY2xhc3M9ImNvZGUiPiYjMTI1OzwvdGV4dD4KCiAgICA8dGV4dCB4PSI4MiIgeT0iNTMwIiBjbGFzcz0iY29kZS1ibHVlIj4wNzwvdGV4dD4KICAgIDx0ZXh0IHg9IjEyMCIgeT0iNTMwIiBjbGFzcz0iY29kZSI+cmV0dXJuIGltcGFjdDs8L3RleHQ+CgogICAgPGxpbmUgeDE9IjIwNSIgeTE9IjU2NSIgeDI9IjIwNSIgeTI9Ijc4MCIgY2xhc3M9ImxpbmUiLz4KICAgIDxjaXJjbGUgY3g9IjIwNSIgY3k9IjU5MCIgcj0iMyIgY2xhc3M9ImRvdCIvPgogICAgPGNpcmNsZSBjeD0iMjA1IiBjeT0iNjI1IiByPSIzIiBjbGFzcz0iZG90Ii8+CiAgICA8Y2lyY2xlIGN4PSIyMDUiIGN5PSI2NjAiIHI9IjMiIGNsYXNzPSJkb3QiLz4KICAgIDxjaXJjbGUgY3g9IjIwNSIgY3k9IjY5NSIgcj0iMyIgY2xhc3M9ImRvdCIvPgogICAgPGNpcmNsZSBjeD0iMjA1IiBjeT0iNzMwIiByPSIzIiBjbGFzcz0iZG90Ii8+CgogICAgPHRleHQgeD0iMjA1IiB5PSI4MzAiIGNsYXNzPSJjb2RlLWJsdWUiIHN0eWxlPSJmb250LXNpemU6MjhweCI+Jmx0Oy8mZ3Q7PC90ZXh0PgogIDwvZz4KCiAgPCEtLSBDb2RlIGluc2lkZSBNIC0tPgogIDxnIGNsaXAtcGF0aD0idXJsKCNjbGlwTSkiPgogICAgPHRleHQgeD0iNTEwIiB5PSIzNTAiIGNsYXNzPSJjb2RlLWJsdWUgc21hbGwiPjAxPC90ZXh0PgogICAgPHRleHQgeD0iNTUwIiB5PSIzNTAiIGNsYXNzPSJjb2RlIHNtYWxsIj5mdW5jdGlvbiBtaW5kKCkgJiMxMjM7PC90ZXh0PgoKICAgIDx0ZXh0IHg9IjUxMCIgeT0iMzgwIiBjbGFzcz0iY29kZS1ibHVlIHNtYWxsIj4wMjwvdGV4dD4KICAgIDx0ZXh0IHg9IjU1MCIgeT0iMzgwIiBjbGFzcz0iY29kZSBzbWFsbCI+Y29uc3QgdCA9ICJUaG91Z2h0Ijs8L3RleHQ+CgogICAgPHRleHQgeD0iNTEwIiB5PSI0MTAiIGNsYXNzPSJjb2RlLWJsdWUgc21hbGwiPjAzPC90ZXh0PgogICAgPHRleHQgeD0iNTUwIiB5PSI0MTAiIGNsYXNzPSJjb2RlIHNtYWxsIj5jb25zdCBtID0gIk1lYW5pbmciOzwvdGV4dD4KCiAgICA8dGV4dCB4PSI1MTAiIHk9IjQ0MCIgY2xhc3M9ImNvZGUtYmx1ZSBzbWFsbCI+MDQ8L3RleHQ+CiAgICA8dGV4dCB4PSI1NTAiIHk9IjQ0MCIgY2xhc3M9ImNvZGUgc21hbGwiPmNvbnN0IGkgPSAiSW1wYWN0Ijs8L3RleHQ+CgogICAgPHRleHQgeD0iNTEwIiB5PSI0ODAiIGNsYXNzPSJjb2RlLWJsdWUgc21hbGwiPjA1PC90ZXh0PgogICAgPHRleHQgeD0iNTUwIiB5PSI0ODAiIGNsYXNzPSJjb2RlIHNtYWxsIj5yZXR1cm4gYCR7dH0ke219JHtpfWA7PC90ZXh0PgoKICAgIDx0ZXh0IHg9IjUxMCIgeT0iNTEwIiBjbGFzcz0iY29kZS1ibHVlIHNtYWxsIj4wNjwvdGV4dD4KICAgIDx0ZXh0IHg9IjU1MCIgeT0iNTEwIiBjbGFzcz0iY29kZSBzbWFsbCI+JiMxMjU7PC90ZXh0PgoKICAgIDx0ZXh0IHg9IjUyMCIgeT0iNjkwIiBjbGFzcz0iY29kZS1ibHVlIHNtYWxsIj4vLyBBbmFseXplPC90ZXh0PgogICAgPHRleHQgeD0iNTIwIiB5PSI3MjAiIGNsYXNzPSJjb2RlLWJsdWUgc21hbGwiPi8vIENvbm5lY3Q8L3RleHQ+CiAgICA8dGV4dCB4PSI1MjAiIHk9Ijc1MCIgY2xhc3M9ImNvZGUtYmx1ZSBzbWFsbCI+Ly8gQnVpbGQ8L3RleHQ+CiAgICA8dGV4dCB4PSI1MjAiIHk9Ijc4MCIgY2xhc3M9ImNvZGUtYmx1ZSBzbWFsbCI+Ly8gU2hpcDwvdGV4dD4KCiAgICA8ZyBvcGFjaXR5PSIuODUiPgogICAgICA8cmVjdCB4PSI5MDUiIHk9IjUyMCIgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQiIGZpbGw9IiMyMzhjZmYiLz4KICAgICAgPHJlY3QgeD0iOTIwIiB5PSI1NDUiIHdpZHRoPSI2NSIgaGVpZ2h0PSI0IiBmaWxsPSIjOGNjNmZmIi8+CiAgICAgIDxyZWN0IHg9IjkwNSIgeT0iNTcwIiB3aWR0aD0iMzIiIGhlaWdodD0iNCIgZmlsbD0iIzIzOGNmZiIvPgogICAgICA8cmVjdCB4PSI5MzAiIHk9IjU5NSIgd2lkdGg9IjU1IiBoZWlnaHQ9IjQiIGZpbGw9IiM4Y2M2ZmYiLz4KICAgICAgPHJlY3QgeD0iOTA1IiB5PSI2MjAiIHdpZHRoPSI3MiIgaGVpZ2h0PSI0IiBmaWxsPSIjMjM4Y2ZmIi8+CiAgICAgIDxyZWN0IHg9IjkyNSIgeT0iNjQ1IiB3aWR0aD0iNDAiIGhlaWdodD0iNCIgZmlsbD0iIzhjYzZmZiIvPgogICAgICA8cmVjdCB4PSI5MDUiIHk9IjY3MCIgd2lkdGg9IjYyIiBoZWlnaHQ9IjQiIGZpbGw9IiMyMzhjZmYiLz4KICAgICAgPHJlY3QgeD0iOTM1IiB5PSI2OTUiIHdpZHRoPSI1MCIgaGVpZ2h0PSI0IiBmaWxsPSIjOGNjNmZmIi8+CiAgICAgIDxyZWN0IHg9IjkwNSIgeT0iNzIwIiB3aWR0aD0iMzUiIGhlaWdodD0iNCIgZmlsbD0iIzIzOGNmZiIvPgogICAgICA8cmVjdCB4PSI5MjUiIHk9Ijc0NSIgd2lkdGg9IjU4IiBoZWlnaHQ9IjQiIGZpbGw9IiM4Y2M2ZmYiLz4KICAgICAgPHJlY3QgeD0iOTA1IiB5PSI3NzAiIHdpZHRoPSI3MiIgaGVpZ2h0PSI0IiBmaWxsPSIjMjM4Y2ZmIi8+CiAgICA8L2c+CiAgPC9nPgoKICA8IS0tIENvZGUgaW5zaWRlIEkgLS0+CiAgPGc+CiAgICA8dGV4dCB4PSIxMDYyIiB5PSIzNjAiIGNsYXNzPSJjb2RlIiBzdHlsZT0iZm9udC1zaXplOjI2cHgiPiZndDtfPC90ZXh0PgogICAgPGxpbmUgeDE9IjEwNjAiIHkxPSIzODIiIHgyPSIxMTI1IiB5Mj0iMzgyIiBzdHJva2U9IiNiN2Q4ZmYiIHN0cm9rZS13aWR0aD0iMiIvPgoKICAgIDx0ZXh0IHg9IjEwNjAiIHk9IjQyNSIgY2xhc3M9ImNvZGUgc21hbGwiPjAxMDAxMTEwPC90ZXh0PgogICAgPHRleHQgeD0iMTA2MCIgeT0iNDUyIiBjbGFzcz0iY29kZSBzbWFsbCI+MDExMDExMDE8L3RleHQ+CiAgICA8dGV4dCB4PSIxMDYwIiB5PSI0NzkiIGNsYXNzPSJjb2RlIHNtYWxsIj4wMTAwMTAwMTwvdGV4dD4KICAgIDx0ZXh0IHg9IjEwNjAiIHk9IjUwNiIgY2xhc3M9ImNvZGUgc21hbGwiPjAxMDAxMTEwPC90ZXh0PgoKICAgIDxsaW5lIHgxPSIxMDYwIiB5MT0iNTM1IiB4Mj0iMTEyNSIgeTI9IjUzNSIgc3Ryb2tlPSIjYjdkOGZmIiBzdHJva2Utd2lkdGg9IjIiLz4KICAgIDx0ZXh0IHg9IjEwNjEiIHk9IjU4NSIgY2xhc3M9ImNvZGUiIHN0eWxlPSJmb250LXNpemU6MjRweCI+Jmx0Oy8mZ3Q7PC90ZXh0PgogICAgPGxpbmUgeDE9IjEwNjAiIHkxPSI2MTUiIHgyPSIxMTI1IiB5Mj0iNjE1IiBzdHJva2U9IiNiN2Q4ZmYiIHN0cm9rZS13aWR0aD0iMiIvPgoKICAgIDx0ZXh0IHg9IjEwNTgiIHk9IjY2MCIgY2xhc3M9ImNvZGUgc21hbGwiPmNvbnN0IGkgPTwvdGV4dD4KICAgIDx0ZXh0IHg9IjEwNTgiIHk9IjY4OCIgY2xhc3M9ImNvZGUgc21hbGwiPmltcGFjdDs8L3RleHQ+CgogICAgPGxpbmUgeDE9IjEwNjAiIHkxPSI3MjAiIHgyPSIxMTI1IiB5Mj0iNzIwIiBzdHJva2U9IiNiN2Q4ZmYiIHN0cm9rZS13aWR0aD0iMiIvPgogICAgPHJlY3QgeD0iMTA2MCIgeT0iNzUwIiB3aWR0aD0iNTUiIGhlaWdodD0iMyIgZmlsbD0iI2Q5ZWNmZiIvPgogICAgPHJlY3QgeD0iMTA2MCIgeT0iNzcwIiB3aWR0aD0iNDAiIGhlaWdodD0iMyIgZmlsbD0iI2Q5ZWNmZiIvPgogICAgPHJlY3QgeD0iMTA2MCIgeT0iNzkwIiB3aWR0aD0iNjUiIGhlaWdodD0iMyIgZmlsbD0iI2Q5ZWNmZiIvPgogICAgPHJlY3QgeD0iMTA2MCIgeT0iODEwIiB3aWR0aD0iNDgiIGhlaWdodD0iMyIgZmlsbD0iI2Q5ZWNmZiIvPgogICAgPGNpcmNsZSBjeD0iMTA2NSIgY3k9Ijg0NSIgcj0iNCIgZmlsbD0iI2Q5ZWNmZiIvPgogICAgPGNpcmNsZSBjeD0iMTA4MCIgY3k9Ijg0NSIgcj0iNCIgZmlsbD0iI2Q5ZWNmZiIvPgogICAgPGNpcmNsZSBjeD0iMTA5NSIgY3k9Ijg0NSIgcj0iNCIgZmlsbD0iI2Q5ZWNmZiIvPgogIDwvZz4KPC9zdmc+Cg==");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 40px 30px;
+        }
+
+        /* Ticket Content Overlay */
+        .ticket-header { text-align: center; width: 100%; }
+        .ticket-logo-text { 
+            font-size: 28px; font-weight: 900; color: #10283f; 
+            letter-spacing: -1px; margin-bottom: 4px;
+            text-shadow: 0 2px 10px rgba(255,255,255,0.8);
+        }
+        .ticket-subtitle { 
+            font-size: 12px; font-weight: 600; color: #2563eb; 
+            text-transform: uppercase; letter-spacing: 2px; 
+        }
+
+        .ticket-body { 
+            background: rgba(255,255,255,0.92); 
+            backdrop-filter: blur(10px);
+            border-radius: 16px; 
+            padding: 24px; 
+            width: 100%; 
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .attendee-name { 
+            font-size: 22px; font-weight: 800; color: #0f172a; 
+            margin-bottom: 4px; line-height: 1.2;
+        }
+        .participant-badge { 
+            display: inline-block; padding: 4px 12px; 
+            background: #eff6ff; color: #2563eb; 
+            border-radius: 20px; font-size: 11px; 
+            font-weight: 700; text-transform: uppercase; 
+            letter-spacing: 1px; margin-bottom: 16px;
+        }
+
+        .team-info { 
+            font-size: 13px; color: #64748b; 
+            margin-bottom: 20px; font-weight: 500;
+        }
+
+        #qrcode { 
+            display: inline-block; 
+            padding: 12px; 
+            background: white; 
+            border-radius: 12px; 
+            border: 1px solid #e2e8f0;
+            margin-bottom: 16px;
+        }
+        #qrcode img { display: block !important; }
+
+        .ticket-id { 
+            font-family: monospace; font-size: 12px; 
+            color: #94a3b8; letter-spacing: 1px; 
+        }
+
+        .ticket-footer { text-align: center; width: 100%; }
+        .scan-hint { 
+            font-size: 11px; color: #10283f; opacity: 0.7; 
+            font-weight: 600; text-transform: uppercase; 
+            letter-spacing: 1px; 
+        }
+
+        /* Print Styles */
+        @media print {
+            body { background: white; padding: 0; }
+            .controls { display: none; }
+            .ticket-wrapper { 
+                box-shadow: none; 
+                border: 1px solid #e2e8f0; 
+                page-break-inside: avoid;
+                margin: 0 auto;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .ticket-wrapper { 
+                width: 100%; max-width: 340px; 
+                height: 520px; padding: 30px 20px; 
+            }
+            .ticket-logo-text { font-size: 24px; }
+            .attendee-name { font-size: 18px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Input Controls -->
+    <div class="controls">
+        <div class="input-group">
+            <label>Participant Name</label>
+            <input type="text" id="nameInput" value="Lintshiwe Pontsho Ntoampi" placeholder="Enter full name">
+        </div>
+        <div class="input-group">
+            <label>Team Name</label>
+            <input type="text" id="teamInput" value="NeuralNinjas" placeholder="Enter team name">
+        </div>
+        <div class="input-group">
+            <label>Track / Category</label>
+            <input type="text" id="trackInput" value="AI & ML" placeholder="e.g., AI & ML, Web Dev">
+        </div>
+        <div class="btn-row">
+            <button class="btn btn-secondary" onclick="randomizeTicket()">Randomize</button>
+            <button class="btn btn-primary" onclick="generateTicket()">Generate Ticket</button>
+        </div>
+        <div class="btn-row" style="margin-top:12px;">
+            <button class="btn btn-secondary" onclick="window.print()" style="flex:1;">🖨️ Print Ticket</button>
+        </div>
+    </div>
+
+    <!-- The Ticket -->
+    <div class="ticket-wrapper" id="ticket">
+        <div class="ticket-header">
+            <div class="ticket-logo-text">TMI HACKATHON</div>
+            <div class="ticket-subtitle">Official Entry Pass</div>
+        </div>
+
+        <div class="ticket-body">
+            <div class="attendee-name" id="displayName">Lintshiwe Pontsho Ntoampi</div>
+            <div class="participant-badge">PARTICIPANT</div>
+            <div class="team-info" id="displayTeam">Team: NeuralNinjas • AI & ML</div>
+            
+            <div id="qrcode"></div>
+            
+            <div class="ticket-id" id="displayId">TMI-2024-XK9P2M</div>
+        </div>
+
+        <div class="ticket-footer">
+            <div class="scan-hint">Scan at entrance for validation</div>
+        </div>
+    </div>
+
+    <script>
+        let qrCodeInstance = null;
+
+        function generateUUID() {
+            return 'TMI-' + Math.random().toString(36).substring(2, 8).toUpperCase() + '-' + Math.random().toString(36).substring(2, 6).toUpperCase();
+        }
+
+        function generateTicket() {
+            const name = document.getElementById('nameInput').value || 'Guest Participant';
+            const team = document.getElementById('teamInput').value || 'Unassigned';
+            const track = document.getElementById('trackInput').value || 'General';
+            const ticketId = generateUUID();
+            
+            // Update Text
+            document.getElementById('displayName').textContent = name;
+            document.getElementById('displayTeam').textContent = `Team: ${team} • ${track}`;
+            document.getElementById('displayId').textContent = ticketId;
+
+            // Generate QR Code
+            const qrContainer = document.getElementById('qrcode');
+            qrContainer.innerHTML = '';
+            
+            // Payload for scanner: JSON string with participant details
+            const qrData = JSON.stringify({
+                id: ticketId,
+                name: name,
+                role: "PARTICIPANT",
+                team: team,
+                track: track,
+                event: "TMI Hackathon 2024",
+                timestamp: new Date().toISOString()
+            });
+
+            qrCodeInstance = new QRCode(qrContainer, {
+                text: qrData,
+                width: 160,
+                height: 160,
+                colorDark : "#0f172a",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+        }
+
+        function randomizeTicket() {
+            const names = ["Sarah Chen", "James Wilson", "Maria Garcia", "David Kim", "Emma Thompson"];
+            const teams = ["NeuralNinjas", "CodeCrafters", "AppBuilders", "DataWizards", "DeepLearn"];
+            const tracks = ["AI & ML", "Web Dev", "Mobile", "Data Science"];
+            
+            document.getElementById('nameInput').value = names[Math.floor(Math.random() * names.length)];
+            document.getElementById('teamInput').value = teams[Math.floor(Math.random() * teams.length)];
+            document.getElementById('trackInput').value = tracks[Math.floor(Math.random() * tracks.length)];
+            generateTicket();
+        }
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', generateTicket);
+    </script>
+</body>
+</html>
