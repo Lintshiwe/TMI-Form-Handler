@@ -2,8 +2,6 @@ import { ConvexHttpClient } from "convex/browser"
 import QRCode from "qrcode"
 import nodemailer from "nodemailer"
 import crypto from "crypto"
-import fs from "fs"
-import path from "path"
 
 function generateTicketId() {
   const rand = crypto.randomBytes(4).toString("hex").toUpperCase()
@@ -12,12 +10,6 @@ function generateTicketId() {
 
 function signData(ticketId, secret) {
   return crypto.createHmac("sha256", secret).update(ticketId).digest("hex")
-}
-
-function pickBackground() {
-  const num = Math.random() < 0.5 ? 1 : 2
-  const bgPath = path.resolve(process.cwd(), "assets", `tmi-ticket-background${num}.png`)
-  return { num, bgPath }
 }
 
 function escapeHtml(str) {
@@ -71,8 +63,6 @@ export async function handler(event) {
     const smtpPass = process.env.SMTP_PASS
 
     if (smtpHost && smtpUser) {
-      const { num, bgPath } = pickBackground()
-      const bgExists = fs.existsSync(bgPath)
       const name = escapeHtml(reg.firstName + " " + reg.lastName)
       const team = escapeHtml(reg.teamName || "Unassigned")
       const track = escapeHtml(reg.hackathonTrack || "General")
@@ -84,16 +74,6 @@ export async function handler(event) {
         auth: { user: smtpUser, pass: smtpPass },
       })
 
-      const bgUrl = `https://tmi-form-handler.netlify.app/assets/tmi-ticket-background${num}.png`
-
-      const bgImg = bgExists
-        ? `<img src="${bgUrl}" width="600" style="display:block;max-width:100%;height:auto;border:0" />`
-        : ""
-
-      const bgStyles = bgExists
-        ? `background-image:url('${bgUrl}');background-size:cover;background-position:center;background-repeat:no-repeat;background-color:#eef4ff`
-        : "background-color:#eef4ff"
-
       await transporter.sendMail({
         from: '"TMI Hackathon" <' + smtpUser + '>',
         to: reg.email,
@@ -101,25 +81,11 @@ export async function handler(event) {
         html: `
 <!DOCTYPE html>
 <html>
-<head><meta charset="UTF-8">
-<style>
-  .bg-wrap img { display:none !important; }
-</style>
-</head>
+<head><meta charset="UTF-8"></head>
 <body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif">
-  <!--[if gte mso 9]>
-  <v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="width:600px">
-    <v:fill type="frame" src="${bgUrl}" color="#eef4ff" />
-    <v:textbox inset="0,0,0,0">
-  <![endif]-->
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#eef4ff" style="${bgStyles}">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#eef4ff" style="background-color:#eef4ff">
     <tr>
-      <td align="center" style="padding:0;font-size:0;line-height:0" class="bg-wrap">
-        ${bgImg}
-      </td>
-    </tr>
-    <tr>
-      <td align="center" style="padding:0 16px 32px">
+      <td align="center" style="padding:40px 16px">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" align="center" style="max-width:420px;margin:0 auto;background:#ffffff;border-radius:24px;border:1px solid #e2e8f0">
           <tr>
             <td align="center" style="padding:32px 24px 0">
@@ -169,10 +135,6 @@ export async function handler(event) {
       </td>
     </tr>
   </table>
-  <!--[if gte mso 9]>
-    </v:textbox>
-  </v:rect>
-  <![endif]-->
 </body>
 </html>`,
         attachments: []
