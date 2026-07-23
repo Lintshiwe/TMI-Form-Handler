@@ -22,6 +22,11 @@
   status = 200
 
 [[redirects]]
+  from = "/api/submission-status"
+  to = "/.netlify/functions/submission-status"
+  status = 200
+
+[[redirects]]
   from = "/api/approve-registration"
   to = "/.netlify/functions/approve-registration"
   status = 200
