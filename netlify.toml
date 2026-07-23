@@ -47,6 +47,11 @@
   status = 200
 
 [[redirects]]
+  from = "/api/scanner-stats"
+  to = "/.netlify/functions/scanner-stats"
+  status = 200
+
+[[redirects]]
   from = "/participant-ticket.html"
   to = "/"
   status = 404
